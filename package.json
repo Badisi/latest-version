@@ -1,0 +1,60 @@
+{
+    "name": "@badisi/latest-version",
+    "version": "1.0.0",
+    "description": "Get latest versions of packages",
+    "homepage": "https://github.com/Badisi/latest-version",
+    "license": "MIT",
+    "author": {
+        "name": "Badisi"
+    },
+    "main": "./index.js",
+    "types": "./index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Badisi/latest-version.git"
+    },
+    "keywords": [
+        "npm",
+        "check",
+        "updates",
+        "latest",
+        "current",
+        "next",
+        "version",
+        "pkg",
+        "package",
+        "package.json",
+        "dependencies",
+        "module"
+    ],
+    "scripts": {
+        "lint": "eslint ./src/**/*.ts --ignore-pattern *.spec.ts",
+        "test": "ts-node ./node_modules/.bin/jasmine --config=jasmine.json",
+        "build": "node ./build.js",
+        "all": "npm run lint && npm run test && npm run build"
+    },
+    "dependencies": {
+        "global-dirs": "^3.0.0",
+        "registry-auth-token": "^4.2.1",
+        "semver": "^7.3.5"
+    },
+    "devDependencies": {
+        "@types/jasmine": "^3.6.9",
+        "@types/node": "^14.14.37",
+        "@types/registry-auth-token": "^4.2.0",
+        "@types/rewire": "^2.5.28",
+        "@types/semver": "^7.3.4",
+        "@typescript-eslint/eslint-plugin": "^4.20.0",
+        "@typescript-eslint/parser": "^4.20.0",
+        "eslint": "^7.22.0",
+        "eslint-plugin-import": "^2.22.1",
+        "eslint-plugin-jsdoc": "^32.3.0",
+        "eslint-plugin-prefer-arrow": "^1.2.3",
+        "fs-extra": "^9.1.0",
+        "jasmine": "^3.7.0",
+        "jasmine-spec-reporter": "^6.0.0",
+        "rewire": "^5.0.0",
+        "ts-node": "^9.1.1",
+        "typescript": "^4.2.3"
+    }
+}

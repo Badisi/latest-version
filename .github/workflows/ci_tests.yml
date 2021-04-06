@@ -1,0 +1,52 @@
+name: CI tests
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  ci_tests_macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 15.x
+      - name: Install dependencies
+        run: npm clean-install
+      - name: Lint
+        run: npm run lint
+      - name: Tests
+        run: npm run test
+
+  ci_tests_linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 15.x
+      - name: Install dependencies
+        run: npm clean-install
+      - name: Lint
+        run: npm run lint
+      - name: Tests
+        run: npm run test
+
+  ci_tests_windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 15.x
+      - name: Install dependencies
+        run: npm clean-install
+      - name: Lint
+        run: npm run lint
+      - name: Tests
+        run: npm run test
