@@ -1,6 +1,6 @@
 # @badisi/latest-version
 
-Get latest versions of packages.
+📦 Get latest versions of packages.
 
 [![npm version](https://img.shields.io/npm/v/@badisi/latest-version.svg?color=blue&logo=npm)][npm]
 [![npm downloads](https://img.shields.io/npm/dw/@badisi/latest-version.svg?color=blue&logo=npm)][npm-dl]
@@ -11,6 +11,7 @@ Get latest versions of packages.
 [![devDependencies status](https://img.shields.io/david/dev/badisi/latest-version.svg)][david-dev-deps]
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)][pullrequest]
 
+<hr>
 
 ## Features
 
