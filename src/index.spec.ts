@@ -267,78 +267,86 @@ describe('@badisi/latest-version', () => {
         let cacheDir = rewire('./index').__get__('getCacheDir')();
         describe('..if useCache=false', () => {
             let pkg: LatestVersionPackage;
-            beforeEach(async () => {
+            beforeEach((done) => {
                 rmSync(cacheDir, { recursive: true, force: true });
-                pkg = await latestVersion('npm');
+                latestVersion('npm')
+                    .then((value: LatestVersionPackage) => {
+                        pkg = value;
+                        setTimeout(() => done(), 1000); // give time for the cache to be persisted
+                    });
             });
-            it('no cache should be created', async () => {
+            it('no cache should be created', () => {
                 expect(existsSync(join(cacheDir, 'npm.json'))).toBe(false);
                 expect(pkg).toBeDefined();
             });
         });
         describe('..if useCache=true', () => {
             let pkg: LatestVersionPackage;
-            beforeEach(async () => {
+            beforeEach((done) => {
                 rmSync(cacheDir, { recursive: true, force: true });
-                pkg = await latestVersion('npm', { useCache: true });
+                latestVersion('npm', { useCache: true })
+                    .then((value: LatestVersionPackage) => {
+                        pkg = value;
+                        setTimeout(() => done(), 1000); // give time for the cache to be persisted
+                    });
             });
-            it('first call -> data should be undefined and returned immediately', () => {
+            it('first call -> data should be undefined and returned immediately', async () => {
                 expect(pkg).toBeDefined();
                 expect(pkg.name).toBe('npm');
                 expect(pkg.latest).toBeUndefined();
                 expect(pkg.latestRange).toBeUndefined();
             });
-            it('first call -> a cache file should be created', () => {
-                return new Promise((resolve) => {
-                    setTimeout(() => {
-                        expect(existsSync(join(cacheDir, 'npm.json'))).toBe(true);
-                        resolve(null);
-                    }, 500);
-                });
+            it('first call -> a cache file should be created', async () => {
+                expect(existsSync(join(cacheDir, 'npm.json'))).toBe(true);
             });
-            it('second call -> data should be defined and returned immediately', async () => {
-                return new Promise((resolve) => {
-                    setTimeout(async () => {
-                        pkg = await latestVersion('npm', { useCache: true });
-                        expect(pkg).toBeDefined();
-                        expect(pkg.name).toBe('npm');
-                        expect(pkg.latest).toBeDefined();
-                        expect(pkg.latestRange).toBeDefined();
-                        resolve(null);
-                    }, 500);
-                });
+            it('second call -> data should be defined and returned immediately', (done) => {
+                latestVersion('npm', { useCache: true })
+                    .then((value: LatestVersionPackage) => {
+                        pkg = value;
+                        setTimeout(() => {
+                            expect(pkg).toBeDefined();
+                            expect(pkg.name).toBe('npm');
+                            expect(pkg.latest).toBeDefined();
+                            expect(pkg.latestRange).toBeDefined();
+                            done();
+                        }, 1000); // give time for the cache to be persisted
+                    });
             });
         });
         describe('..if cacheMaxAge=0', () => {
             let pkg: LatestVersionPackage;
-            beforeEach(async () => {
+            beforeEach((done) => {
                 rmSync(cacheDir, { recursive: true, force: true });
-                pkg = await latestVersion('npm', { useCache: true });
+                latestVersion('npm', { useCache: true })
+                    .then((value: LatestVersionPackage) => {
+                        pkg = value;
+                        setTimeout(() => done(), 1000); // give time for the cache to be persisted
+                    });
             });
-            it('second call with cacheMaxAge=0 -> data should be undefined and returned immediately', async () => {
-                return new Promise((resolve) => {
-                    setTimeout(async () => {
-                        pkg = await latestVersion('npm', { useCache: true, cacheMaxAge: 0 });
-                        expect(pkg).toBeDefined();
-                        expect(pkg.name).toBe('npm');
-                        expect(pkg.latest).toBeUndefined();
-                        expect(pkg.latestRange).toBeUndefined();
-                        resolve(null);
-                    }, 500);
-                });
+            it('second call with cacheMaxAge=0 -> data should be undefined and returned immediately', (done) => {
+                latestVersion('npm', { useCache: true, cacheMaxAge: 0 })
+                    .then((value: LatestVersionPackage) => {
+                        pkg = value;
+                        setTimeout(() => {
+                            expect(pkg).toBeDefined();
+                            expect(pkg.name).toBe('npm');
+                            expect(pkg.latest).toBeUndefined();
+                            expect(pkg.latestRange).toBeUndefined();
+                            done();
+                        }, 1000); // give time for the cache to be persisted
+                    });
             });
-            it('second call with cacheMaxAge=0 -> lastUpdateDate should be updated', async () => {
-                return new Promise((resolve) => {
-                    setTimeout(async () => {
-                        const { lastUpdateDate: before } = JSON.parse(readFileSync(join(cacheDir, 'npm.json')).toString());
-                        pkg = await latestVersion('npm', { useCache: true, cacheMaxAge: 0 });
+            it('second call with cacheMaxAge=0 -> lastUpdateDate should be updated', (done) => {
+                const { lastUpdateDate: before } = JSON.parse(readFileSync(join(cacheDir, 'npm.json')).toString());
+                latestVersion('npm', { useCache: true, cacheMaxAge: 0 })
+                    .then((value: LatestVersionPackage) => {
+                        pkg = value;
                         setTimeout(() => {
                             const { lastUpdateDate: after } = JSON.parse(readFileSync(join(cacheDir, 'npm.json')).toString());
                             expect(before).toBeLessThan(after);
-                            resolve(null);
-                        }, 500);
-                    }, 500);
-                });
+                            done();
+                        }, 1000); // give time for the cache to be persisted
+                    });
             });
         });
     });
