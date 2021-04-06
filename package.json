@@ -23,7 +23,7 @@
         "version",
         "pkg",
         "package",
-        "package.json",
+        "package-json",
         "dependencies",
         "module"
     ],
