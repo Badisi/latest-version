@@ -17,7 +17,8 @@ const spyOnRequire = (id: string): jasmine.Spy => {
     const Mod = require('module');
     const ori = Mod.prototype.require;
     Mod.prototype.require = function () {
-        return (arguments[0].indexOf(id) !== -1) ? spy() : ori.apply(this, arguments);
+        const convertedId = join(id); // use path.join to convert path separator (posix vs windows)
+        return (arguments[0].indexOf(convertedId) !== -1) ? spy() : ori.apply(this, arguments);
     };
     return spy;
 };
