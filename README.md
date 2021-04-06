@@ -42,15 +42,14 @@ import { readFileSync } from 'fs';
 import latestVersion from '@badisi/latest-version';
 
 (async () => {
+    // Single package
     await latestVersion('npm');
-    await latestVersion('npm@^5.0.2', { useCache: true });
+    // List of packages
     await latestVersion(['npm', 'npm@1.3.2', '@scope/pkg@^5.0.2']);
-    await latestVersion({
-        dependencies: { 'npm': 'latest' },
-        devDependencies: { 'npm': '1.3.2' },
-        peerDependencies: { '@scope/pkg': '^5.0.2' }
-    });
+    // Package.json
     await latestVersion(JSON.parse(readFileSync('package.json')));
+    // Using cache
+    await latestVersion('npm@^5.0.2', { useCache: true });
 })();
 ```
 
@@ -59,7 +58,7 @@ __Return__
 Either a collection or a single `LatestVersionPackage` object:
 
 ```ts
-{
+interface LatestVersionPackage {
     /**
      * The name of the package.
      */
@@ -99,7 +98,7 @@ Either a collection or a single `LatestVersionPackage` object:
 __Options__
 
 ```ts
-{
+interface LatestVersionOptions {
     /**
      * Awaiting the api to return might take time, depending on the network, and might impact your package loading performance.
      * You can use the cache mechanism to improve load performance and reduce unnecessary network requests.
