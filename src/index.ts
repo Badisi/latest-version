@@ -240,7 +240,7 @@ const getCacheDir = (name = 'badisi.latest-version'): string => {
 
 const saveMetadataToCache = (pkg: PackageMetadata): void => {
     const cacheDir = getCacheDir();
-    if (!existsSync(cacheDir)) { mkdirSync(cacheDir); }
+    if (!existsSync(cacheDir)) { mkdirSync(cacheDir, { recursive: true }); }
     writeFileSync(join(getCacheDir(), `${pkg.name}.json`), JSON.stringify(pkg));
 };
 
