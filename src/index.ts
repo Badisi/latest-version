@@ -85,7 +85,7 @@ interface LatestVersionOptions {
     /**
      * A JavaScript package registry url that implements the CommonJS Package Registry specification.
      *
-     * @default "Look at any registry urls in the .npmrc file or fallback to the default npm registry instead"
+     * @default "Looks at any registry urls in the .npmrc file or fallback to the default npm registry instead"
      * @example <caption>.npmrc</caption>
      * registry = 'https://custom-registry.com/'
      * @pkgscope:registry = 'https://custom-registry.com/'

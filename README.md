@@ -44,10 +44,13 @@ import latestVersion from '@badisi/latest-version';
 (async () => {
     // Single package
     await latestVersion('npm');
+
     // List of packages
     await latestVersion(['npm', 'npm@1.3.2', '@scope/pkg@^5.0.2']);
+
     // Package.json
     await latestVersion(JSON.parse(readFileSync('package.json')));
+
     // Using cache
     await latestVersion('npm@^5.0.2', { useCache: true });
 })();
@@ -127,7 +130,7 @@ interface LatestVersionOptions {
     /**
      * A JavaScript package registry url that implements the CommonJS Package Registry specification.
      *
-     * @default "Look at any registry urls in the .npmrc file or fallback to the default npm registry instead"
+     * @default "Looks at any registry urls in the .npmrc file or fallback to the default npm registry instead"
      * @example <caption>.npmrc</caption>
      * registry = 'https://custom-registry.com/'
      * @pkgscope:registry = 'https://custom-registry.com/'
