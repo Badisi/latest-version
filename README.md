@@ -37,9 +37,9 @@ $ yarn add @badisi/latest-version
 
 __Example__
 
-```ts
-import { readFileSync } from 'fs';
-import latestVersion from '@badisi/latest-version';
+```js
+const { readFileSync } = require('fs');
+const latestVersion = require('@badisi/latest-version');
 
 (async () => {
     // Single package
