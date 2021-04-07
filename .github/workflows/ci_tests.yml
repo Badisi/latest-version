@@ -12,6 +12,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 15.x
+      - name: Make sure npm is installed globally
+        run: npm install -g npm@latest
       - name: Install dependencies
         run: npm clean-install
       - name: Lint
@@ -28,6 +30,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 15.x
+      - name: Make sure npm is installed globally
+        run: npm install -g npm@latest
       - name: Install dependencies
         run: npm clean-install
       - name: Lint
@@ -44,6 +48,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 15.x
+      - name: Make sure npm is installed globally
+        run: npm install -g npm@latest
       - name: Install dependencies
         run: npm clean-install
       - name: Lint
