@@ -4,11 +4,14 @@ import { join } from 'path';
 import rewire from 'rewire';
 
 interface Data {
-    only: LatestVersionPackage;
+    empty: LatestVersionPackage;
+    string: LatestVersionPackage;
     exactRange: LatestVersionPackage;
     minorRange: LatestVersionPackage;
     patchRange: LatestVersionPackage;
     collection: LatestVersionPackage[];
+    collectionWOfOne: LatestVersionPackage[];
+    collectionEmpty: LatestVersionPackage[];
     json: LatestVersionPackage[];
 }
 
@@ -25,11 +28,14 @@ const spyOnRequire = (id: string): jasmine.Spy => {
 
 const getData = async (): Promise<Data> => {
     return {
-        only: await latestVersion('npm'),
+        empty: await latestVersion(''),
+        string: await latestVersion('npm'),
         exactRange: await latestVersion('npm@5.0.2'),
         minorRange: await latestVersion('npm@^5.0.2'),
         patchRange: await latestVersion('npm@~5.0.2'),
         collection: await latestVersion(['npm', 'npm@1.3.2', '@scope/name@^5.0.2']),
+        collectionWOfOne: await latestVersion(['npm']),
+        collectionEmpty: await latestVersion([]),
         json: await latestVersion({
             dependencies: { 'npm': 'latest' },
             devDependencies: { 'npm': '1.3.2' },
@@ -51,9 +57,39 @@ describe('@badisi/latest-version', () => {
         pkgNotInstalled = await getData();
     });
 
+    describe('Test return objects', () => {
+        it('with empty', () => {
+            expect(pkg.empty).toBeUndefined();
+        });
+        it('with package string', () => {
+            expect(Array.isArray(pkg.string)).toBe(false);
+        });
+        it('with package range', () => {
+            expect(Array.isArray(pkg.exactRange)).toBe(false);
+            expect(Array.isArray(pkg.minorRange)).toBe(false);
+            expect(Array.isArray(pkg.patchRange)).toBe(false);
+        });
+        it('with collection', () => {
+            expect(Array.isArray(pkg.collection)).toBe(true);
+            expect(pkg.collection.length).toBe(3);
+        });
+        it('with collection of one', () => {
+            expect(Array.isArray(pkg.collectionWOfOne)).toBe(true);
+            expect(pkg.collectionWOfOne.length).toBe(1);
+        });
+        it('with collection empty', () => {
+            expect(Array.isArray(pkg.collectionEmpty)).toBe(true);
+            expect(pkg.collectionEmpty.length).toBe(0);
+        });
+        it('with package json', () => {
+            expect(Array.isArray(pkg.json)).toBe(true);
+            expect(pkg.json.length).toBe(3);
+        });
+    });
+
     describe('Test "name"', () => {
         it('with package string', () => {
-            expect(pkg.only.name).toBe('npm');
+            expect(pkg.string.name).toBe('npm');
         });
         it('with package range', () => {
             expect(pkg.exactRange.name).toBe('npm');
@@ -74,7 +110,7 @@ describe('@badisi/latest-version', () => {
 
     describe('Test "range"', () => {
         it('with package string', () => {
-            expect(pkg.only.range).toBe('latest');
+            expect(pkg.string.range).toBe('latest');
         });
         it('with package range', () => {
             expect(pkg.exactRange.range).toBe('5.0.2');
@@ -96,7 +132,7 @@ describe('@badisi/latest-version', () => {
     describe('Test "installed"', () => {
         describe('..if package not installed', () => {
             it('with package string', () => {
-                expect(pkgNotInstalled.only.installed).toBeUndefined();
+                expect(pkgNotInstalled.string.installed).toBeUndefined();
             });
             it('with package range', () => {
                 expect(pkgNotInstalled.exactRange.installed).toBeUndefined();
@@ -116,7 +152,7 @@ describe('@badisi/latest-version', () => {
         });
         describe('..if package installed', () => {
             it('with package string', () => {
-                expect(pkgInstalled.only.installed).toBe('5.0.2');
+                expect(pkgInstalled.string.installed).toBe('5.0.2');
             });
             it('with package range', () => {
                 expect(pkgInstalled.exactRange.installed).toBe('5.0.2');
@@ -139,7 +175,7 @@ describe('@badisi/latest-version', () => {
     describe('Test "updateAvailable"', () => {
         describe('..if package not installed', () => {
             it('with package string', () => {
-                expect(pkgNotInstalled.only.updateAvailable).toBe(false);
+                expect(pkgNotInstalled.string.updateAvailable).toBe(false);
             });
             it('with package range', () => {
                 expect(pkgNotInstalled.exactRange.updateAvailable).toBe(false);
@@ -159,7 +195,7 @@ describe('@badisi/latest-version', () => {
         });
         describe('..if package installed', () => {
             it('with package string', () => {
-                expect(pkgInstalled.only.updateAvailable).toBe(true);
+                expect(pkgInstalled.string.updateAvailable).toBe(true);
             });
             it('with package range', () => {
                 expect(pkgInstalled.exactRange.updateAvailable).toBe(false);
@@ -181,28 +217,28 @@ describe('@badisi/latest-version', () => {
 
     describe('Test "latest"', () => {
         it('with package string', () => {
-            expect(pkg.only.latest).toBeDefined();
+            expect(pkg.string.latest).toBeDefined();
         });
         it('with package range', () => {
-            expect(pkg.exactRange.latest).toBe(pkg.only.latest);
-            expect(pkg.minorRange.latest).toBe(pkg.only.latest);
-            expect(pkg.patchRange.latest).toBe(pkg.only.latest);
+            expect(pkg.exactRange.latest).toBe(pkg.string.latest);
+            expect(pkg.minorRange.latest).toBe(pkg.string.latest);
+            expect(pkg.patchRange.latest).toBe(pkg.string.latest);
         });
         it('with collection', () => {
-            expect(pkg.collection[0].latest).toBe(pkg.only.latest);
-            expect(pkg.collection[1].latest).toBe(pkg.only.latest);
+            expect(pkg.collection[0].latest).toBe(pkg.string.latest);
+            expect(pkg.collection[1].latest).toBe(pkg.string.latest);
             expect(pkg.collection[2].latest).toBeUndefined();
         });
         it('with package json', () => {
-            expect(pkg.json[0].latest).toBe(pkg.only.latest);
-            expect(pkg.json[1].latest).toBe(pkg.only.latest);
+            expect(pkg.json[0].latest).toBe(pkg.string.latest);
+            expect(pkg.json[1].latest).toBe(pkg.string.latest);
             expect(pkg.json[2].latest).toBeUndefined();
         });
     });
 
     describe('Test "latestRange"', () => {
         it('with package string', () => {
-            expect(pkg.only.latestRange).toBe(pkg.only.latest);
+            expect(pkg.string.latestRange).toBe(pkg.string.latest);
         });
         it('with package range', () => {
             expect(pkg.exactRange.latestRange).toBe('5.0.2');
@@ -224,7 +260,7 @@ describe('@badisi/latest-version', () => {
     describe('Test "error"', () => {
         describe('..if package not installed', () => {
             it('with package string', () => {
-                expect(pkgInstalled.only.error).toBeUndefined();
+                expect(pkgInstalled.string.error).toBeUndefined();
             });
             it('with package range', () => {
                 expect(pkgInstalled.exactRange.error).toBeUndefined();
@@ -244,7 +280,7 @@ describe('@badisi/latest-version', () => {
         });
         describe('..if package installed', () => {
             it('with package string', () => {
-                expect(pkgInstalled.only.error).toBeUndefined();
+                expect(pkgInstalled.string.error).toBeUndefined();
             });
             it('with package range', () => {
                 expect(pkgInstalled.exactRange.error).toBeUndefined();

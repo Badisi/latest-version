@@ -311,7 +311,7 @@ const getInfo = async (pkg: Package, options?: LatestVersionOptions): Promise<La
 
 const latestVersion: LatestVersion = async (arg: Package | Package[] | PackageJson, options?: LatestVersionOptions): Promise<any> => {
     const pkgs: string[] = [];
-    if (typeof arg === 'string') {
+    if (typeof arg === 'string' && (arg !== '')) {
         pkgs.push(arg);
     } else if (Array.isArray(arg)) {
         pkgs.push(...arg);
@@ -329,7 +329,7 @@ const latestVersion: LatestVersion = async (arg: Package | Package[] | PackageJs
     const jobs = await Promise.allSettled(pkgs.map((pkg: string) => getInfo(pkg, options)));
     const results = jobs.map((jobResult: PromiseSettledResult<LatestVersionPackage>) =>
         (jobResult as PromiseFulfilledResult<LatestVersionPackage>).value);
-    return (results.length === 1) ? results[0] : results;
+    return (typeof arg === 'string') ? results[0] : results;
 };
 
 export {
