@@ -275,18 +275,12 @@ const getLatestVersions = async (pkgName: string, pkgRange: string, options?: La
 };
 
 const getInstalledVersion = (pkgName: string): string | undefined => {
-    const tryPaths = (paths: string[]): string | undefined => {
-        try {
-            return require(require.resolve(paths.shift() as string))?.version as string | undefined;
-        } catch {
-            return (paths?.length) ? tryPaths(paths) : undefined;
-        }
-    };
-    return tryPaths([
-        join(pkgName, 'package.json'),
-        join(npm.packages, pkgName, 'package.json'),
-        join(yarn.packages, pkgName, 'package.json')
-    ]);
+    try {
+        const paths = ['.', npm.packages, yarn.packages];
+        return require(require.resolve(join(pkgName, 'package.json'), { paths }))?.version as string | undefined;
+    } catch {
+        return undefined;
+    }
 };
 
 const getInfo = async (pkg: Package, options?: LatestVersionOptions): Promise<LatestVersionPackage> => {
