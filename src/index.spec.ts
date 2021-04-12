@@ -321,7 +321,7 @@ describe('@badisi/latest-version', () => {
             let pkg: LatestVersionPackage;
             beforeEach((done) => {
                 rmSync(cacheDir, { recursive: true, force: true });
-                latestVersion('npm', { useCache: true })
+                latestVersion('@badisi/latest-version', { useCache: true })
                     .then((value: LatestVersionPackage) => {
                         pkg = value;
                         setTimeout(() => done(), 1000); // give time for the cache to be persisted
@@ -329,20 +329,20 @@ describe('@badisi/latest-version', () => {
             });
             it('first call -> data should be undefined and returned immediately', async () => {
                 expect(pkg).toBeDefined();
-                expect(pkg.name).toBe('npm');
+                expect(pkg.name).toBe('@badisi/latest-version');
                 expect(pkg.latest).toBeUndefined();
                 expect(pkg.latestRange).toBeUndefined();
             });
             it('first call -> a cache file should be created', async () => {
-                expect(existsSync(join(cacheDir, 'npm.json'))).toBe(true);
+                expect(existsSync(join(cacheDir, '@badisi/latest-version.json'))).toBe(true);
             });
             it('second call -> data should be defined and returned immediately', (done) => {
-                latestVersion('npm', { useCache: true })
+                latestVersion('@badisi/latest-version', { useCache: true })
                     .then((value: LatestVersionPackage) => {
                         pkg = value;
                         setTimeout(() => {
                             expect(pkg).toBeDefined();
-                            expect(pkg.name).toBe('npm');
+                            expect(pkg.name).toBe('@badisi/latest-version');
                             expect(pkg.latest).toBeDefined();
                             expect(pkg.latestRange).toBeDefined();
                             done();
@@ -354,19 +354,19 @@ describe('@badisi/latest-version', () => {
             let pkg: LatestVersionPackage;
             beforeEach((done) => {
                 rmSync(cacheDir, { recursive: true, force: true });
-                latestVersion('npm', { useCache: true })
+                latestVersion('@badisi/latest-version', { useCache: true })
                     .then((value: LatestVersionPackage) => {
                         pkg = value;
                         setTimeout(() => done(), 1000); // give time for the cache to be persisted
                     });
             });
             it('second call with cacheMaxAge=0 -> data should be undefined and returned immediately', (done) => {
-                latestVersion('npm', { useCache: true, cacheMaxAge: 0 })
+                latestVersion('@badisi/latest-version', { useCache: true, cacheMaxAge: 0 })
                     .then((value: LatestVersionPackage) => {
                         pkg = value;
                         setTimeout(() => {
                             expect(pkg).toBeDefined();
-                            expect(pkg.name).toBe('npm');
+                            expect(pkg.name).toBe('@badisi/latest-version');
                             expect(pkg.latest).toBeUndefined();
                             expect(pkg.latestRange).toBeUndefined();
                             done();
@@ -374,12 +374,12 @@ describe('@badisi/latest-version', () => {
                     });
             });
             it('second call with cacheMaxAge=0 -> lastUpdateDate should be updated', (done) => {
-                const { lastUpdateDate: before } = JSON.parse(readFileSync(join(cacheDir, 'npm.json')).toString());
-                latestVersion('npm', { useCache: true, cacheMaxAge: 0 })
+                const { lastUpdateDate: before } = JSON.parse(readFileSync(join(cacheDir, '@badisi/latest-version.json')).toString());
+                latestVersion('@badisi/latest-version', { useCache: true, cacheMaxAge: 0 })
                     .then((value: LatestVersionPackage) => {
                         pkg = value;
                         setTimeout(() => {
-                            const { lastUpdateDate: after } = JSON.parse(readFileSync(join(cacheDir, 'npm.json')).toString());
+                            const { lastUpdateDate: after } = JSON.parse(readFileSync(join(cacheDir, '@badisi/latest-version.json')).toString());
                             expect(before).toBeLessThan(after);
                             done();
                         }, 1000); // give time for the cache to be persisted

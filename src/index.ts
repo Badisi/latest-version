@@ -5,8 +5,8 @@ import { RequestOptions as HttpRequestOptions, Agent, IncomingMessage } from 'no
 import { RequestOptions as HttpsRequestOptions } from 'node:https';
 import { gt, maxSatisfying } from 'semver';
 import { npm, yarn } from 'global-dirs';
+import { join, dirname } from 'path';
 import { homedir } from 'os';
-import { join } from 'path';
 import { URL } from 'url';
 
 interface LatestVersions {
@@ -229,7 +229,7 @@ const downloadMetadata = (pkgName: string, options?: LatestVersionOptions): Prom
     });
 };
 
-const getCacheDir = (name = 'badisi.latest-version'): string => {
+const getCacheDir = (name = '@badisi/latest-version'): string => {
     const homeDir = homedir();
     switch (process.platform) {
         case 'darwin': return join(homeDir, 'Library', 'Caches', name);
@@ -239,9 +239,9 @@ const getCacheDir = (name = 'badisi.latest-version'): string => {
 };
 
 const saveMetadataToCache = (pkg: PackageMetadata): void => {
-    const cacheDir = getCacheDir();
-    if (!existsSync(cacheDir)) { mkdirSync(cacheDir, { recursive: true }); }
-    writeFileSync(join(getCacheDir(), `${pkg.name}.json`), JSON.stringify(pkg));
+    const filePath = join(getCacheDir(), `${pkg.name}.json`);
+    if (!existsSync(dirname(filePath))) { mkdirSync(dirname(filePath), { recursive: true }); }
+    writeFileSync(filePath, JSON.stringify(pkg));
 };
 
 const getMetadataFromCache = (pkgName: string, options?: LatestVersionOptions): PackageMetadata | undefined => {
