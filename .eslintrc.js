@@ -1,15 +1,20 @@
 module.exports = {
     "env": {
         "browser": true,
+        "node": true,
         "es6": true
     },
     "extends": [
         "plugin:@typescript-eslint/recommended",
         "plugin:@typescript-eslint/recommended-requiring-type-checking"
     ],
+    "ignorePatterns": [".eslintrc.js"],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "tsconfig.json",
+        "project": [
+            "tsconfig.spec.json",
+            "tsconfig.json"
+        ],
         "sourceType": "module"
     },
     "plugins": [
@@ -82,8 +87,10 @@ module.exports = {
         "@typescript-eslint/naming-convention": [
             "warn",
             {
-                selector: "variable",
-                format: ["camelCase"]
+                "selector": "variable",
+                "format": [
+                    "camelCase"
+                ]
             }
         ],
         "@typescript-eslint/no-empty-function": "off",
