@@ -210,6 +210,7 @@ describe('@badisi/latest-version', () => {
         describe('useCache=false', () => {
             beforeAll((done) => {
                 rmSync(cacheDir, { recursive: true, force: true });
+                spyOnRequire('npm/package.json').and.returnValue({ version: undefined });
                 void latestVersion(['npm', '@badisi/latest-version'], { useCache: false })
                     .then(() => {
                         setTimeout(() => done(), 1000); // give time for the cache to be persisted
@@ -224,6 +225,7 @@ describe('@badisi/latest-version', () => {
             let pkgsCached: LatestVersionPackage[];
             beforeEach((done) => {
                 rmSync(cacheDir, { recursive: true, force: true });
+                spyOnRequire('npm/package.json').and.returnValue({ version: undefined });
                 void latestVersion(['npm@^5.0.2', '@badisi/latest-version'], { useCache: true })
                     .then((value: LatestVersionPackage[]) => {
                         pkgsCached = value;
@@ -272,6 +274,7 @@ describe('@badisi/latest-version', () => {
         describe('cacheMaxAge=0', () => {
             beforeEach((done) => {
                 rmSync(cacheDir, { recursive: true, force: true });
+                spyOnRequire('npm/package.json').and.returnValue({ version: undefined });
                 void latestVersion(['npm@^5.0.2', '@badisi/latest-version'], { useCache: true })
                     .then(() => {
                         setTimeout(() => done(), 1000); // give time for the cache to be persisted
