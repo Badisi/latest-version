@@ -15,13 +15,13 @@ interface LatestVersions {
      */
     latest?: string;
     /**
-     * The latest version of the package satisfied by the provided range (if provided).
-     */
-    latestRange?: string;
-    /**
-     * The next version of the package (if available).
+     * The next version of the package found on the provided registry (if found).
      */
     next?: string;
+    /**
+     * The latest version of the package found on the provided registry and satisfied by the provided tag or version range (if provided).
+     */
+    wanted?: string;
 }
 
 interface LatestVersionPackage extends LatestVersions {
@@ -30,19 +30,21 @@ interface LatestVersionPackage extends LatestVersions {
      */
     name: string;
     /**
-     * The range that was provided (if any).
-     *
-     * @default "latest"
-     */
-    range: string;
-    /**
-     * Whether the installed version could be upgraded or not (if installed).
-     */
-    updateAvailable: boolean;
-    /**
      * The current local or global installed version of the package (if installed).
      */
     installed?: string;
+    /**
+     * The tag or version range that was provided (if provided).
+     */
+    wantedTagOrRange?: string;
+    /**
+     * Whether the installed version (if any) could be upgraded or not.
+     */
+    updatesAvailable: {
+        latest: boolean;
+        next: boolean;
+        wanted: boolean;
+    };
     /**
      * Any error that might have occurred during the process.
      */
@@ -107,8 +109,7 @@ interface PackageMetadata {
     name: string;
     lastUpdateDate: number;
     versions: string[];
-    latest: string;
-    next: string;
+    distTags: Record<string, string>;
 }
 
 type LatestVersion = {
@@ -206,8 +207,7 @@ const downloadMetadata = (pkgName: string, options?: LatestVersionOptions): Prom
                             name: pkgName,
                             lastUpdateDate: Date.now(),
                             versions: Object.keys(pkgMetadata.versions),
-                            latest: pkgMetadata['dist-tags']?.latest,
-                            next: pkgMetadata['dist-tags']?.next
+                            distTags: pkgMetadata['dist-tags']
                         });
                     } catch (err) {
                         return reject(err);
@@ -256,22 +256,27 @@ const getMetadataFromCache = (pkgName: string, options?: LatestVersionOptions): 
     return undefined;
 };
 
-const getLatestVersions = async (pkgName: string, pkgRange: string, options?: LatestVersionOptions): Promise<LatestVersions> => {
+const getLatestVersions = async (pkgName: string, tagOrRange?: string, options?: LatestVersionOptions): Promise<LatestVersions> => {
     let pkgMetadata: PackageMetadata | undefined;
-    if (options?.useCache) {
+    if (pkgName.length && options?.useCache) {
         pkgMetadata = getMetadataFromCache(pkgName, options);
         if (!pkgMetadata) {
             downloadMetadata(pkgName, options).then(saveMetadataToCache).catch((err) => { throw err; });
         }
-    } else {
+    } else if (pkgName.length) {
         pkgMetadata = await downloadMetadata(pkgName, options);
     }
-    const pkgLatestRange = (pkgRange === 'latest') ? pkgMetadata?.latest : maxSatisfying(pkgMetadata?.versions || [], pkgRange);
-    return {
-        latest: pkgMetadata?.latest,
-        latestRange: (pkgLatestRange !== null) ? pkgLatestRange : undefined,
-        next: pkgMetadata?.next
+
+    const versions: LatestVersions = {
+        latest: pkgMetadata?.distTags?.latest,
+        next: pkgMetadata?.distTags?.next
     };
+    if (tagOrRange && pkgMetadata?.distTags && pkgMetadata?.distTags[tagOrRange]) {
+        versions.wanted = pkgMetadata.distTags[tagOrRange];
+    } else if (tagOrRange && pkgMetadata?.versions?.length) {
+        versions.wanted = maxSatisfying(pkgMetadata.versions, tagOrRange) || undefined;
+    }
+    return versions;
 };
 
 const getInstalledVersion = (pkgName: string): string | undefined => {
@@ -287,21 +292,21 @@ const getInfo = async (pkg: Package, options?: LatestVersionOptions): Promise<La
     const i = pkg.lastIndexOf('@');
     let pkgInfo: LatestVersionPackage = {
         name: (i > 1) ? pkg.slice(0, i) : pkg,
-        range: (i > 1) ? pkg.slice(i + 1) : 'latest',
-        updateAvailable: false
+        wantedTagOrRange: (i > 1) ? pkg.slice(i + 1) : undefined,
+        updatesAvailable: { latest: false, next: false, wanted: false }
     };
 
     try {
         pkgInfo = {
             ...pkgInfo,
             installed: getInstalledVersion(pkgInfo.name),
-            ...(await getLatestVersions(pkgInfo.name, pkgInfo.range, options))
+            ...(await getLatestVersions(pkgInfo.name, pkgInfo.wantedTagOrRange, options))
         };
-        if (pkgInfo.latestRange && pkgInfo.installed) {
-            pkgInfo.updateAvailable = gt(pkgInfo.latestRange, pkgInfo.installed);
-        } else if (pkgInfo.latest && pkgInfo.installed) {
-            pkgInfo.updateAvailable = gt(pkgInfo.latest, pkgInfo.installed);
-        }
+        pkgInfo.updatesAvailable = {
+            latest: (pkgInfo.installed && pkgInfo.latest) ? gt(pkgInfo.latest, pkgInfo.installed) : false,
+            next: (pkgInfo.installed && pkgInfo.next) ? gt(pkgInfo.next, pkgInfo.installed) : false,
+            wanted: (pkgInfo.installed && pkgInfo.wanted) ? gt(pkgInfo.wanted, pkgInfo.installed) : false
+        };
     } catch (err) {
         pkgInfo.error = err.message || err;
     }
@@ -311,7 +316,7 @@ const getInfo = async (pkg: Package, options?: LatestVersionOptions): Promise<La
 
 const latestVersion: LatestVersion = async (arg: Package | Package[] | PackageJson, options?: LatestVersionOptions): Promise<any> => {
     const pkgs: string[] = [];
-    if (typeof arg === 'string' && (arg !== '')) {
+    if (typeof arg === 'string') {
         pkgs.push(arg);
     } else if (Array.isArray(arg)) {
         pkgs.push(...arg);
@@ -334,9 +339,10 @@ const latestVersion: LatestVersion = async (arg: Package | Package[] | PackageJs
 
 export {
     LatestVersion,
+    Package,
     PackageRange,
-    PackageJsonDependencies,
     PackageJson,
+    PackageJsonDependencies,
     LatestVersions,
     LatestVersionPackage,
     RequestOptions,

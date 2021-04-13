@@ -15,13 +15,12 @@
 
 ## Features
 
-* Get latest and next versions of packages from package registries
-* Get latest version of packages based on a range
-* Get installed version of packages (global or local)
-* Check if package updates are available
+* Get latest versions of packages *(from package registries)*
+  * `latest`, `next` and `wanted` if a version range or a tag is provided
+* Get `installed` version of packages *(local or global)*
+* Check if `updates` are available
 * Cache support to increase data retrieval performance
 * Support public/private repositories and proxies
-
 
 ## Installation
 
@@ -46,7 +45,7 @@ const latestVersion = require('@badisi/latest-version');
     await latestVersion('npm');
 
     // List of packages
-    await latestVersion(['npm', 'npm@1.3.2', '@scope/pkg@^5.0.2']);
+    await latestVersion(['npm', 'npm@1.3.2', 'npm@beta', '@scope/name@^5.0.2']);
 
     // Package.json
     await latestVersion(JSON.parse(readFileSync('package.json')));
@@ -67,16 +66,7 @@ interface LatestVersionPackage {
      */
     name: string;
     /**
-     * The version range that was provided (if any).
-     * @default "latest"
-     */
-    range: string;
-    /**
-     * Whether the installed version (if any) could be upgraded or not.
-     */
-    updateAvailable: boolean;
-    /**
-     * The current local or global installed version of the package (if any).
+     * The current local or global installed version of the package (if installed).
      */
     installed?: string;
     /**
@@ -84,13 +74,25 @@ interface LatestVersionPackage {
      */
     latest?: string;
     /**
-     * The latest version of the package satisfied by the provided range (if provided).
-     */
-    latestRange?: string;
-    /**
-     * The next version of the package (if available).
+     * The next version of the package found on the provided registry (if found).
      */
     next?: string;
+    /**
+     * The latest version of the package found on the provided registry and satisfied by the provided tag or version range (if provided).
+     */
+    wanted?: string;
+    /**
+     * The tag or version range that was provided (if provided).
+     */
+    wantedTagOrRange?: string;
+    /**
+     * Whether the installed version (if any) could be upgraded or not.
+     */
+    updatesAvailable: {
+        latest: boolean;
+        next: boolean;
+        wanted: boolean;
+    };
     /**
      * Any error that might have occurred during the process.
      */

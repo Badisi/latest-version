@@ -1,21 +1,10 @@
-import latestVersion, { LatestVersionPackage } from './index';
+import latestVersion, { Package, PackageJson, LatestVersionPackage } from './index';
 import { existsSync, readFileSync, rmSync } from 'fs';
 import { join } from 'path';
 import rewire from 'rewire';
 
-interface Data {
-    empty: LatestVersionPackage;
-    string: LatestVersionPackage;
-    exactRange: LatestVersionPackage;
-    minorRange: LatestVersionPackage;
-    patchRange: LatestVersionPackage;
-    collection: LatestVersionPackage[];
-    collectionWOfOne: LatestVersionPackage[];
-    collectionEmpty: LatestVersionPackage[];
-    json: LatestVersionPackage[];
-}
-
 const spyOnRequire = (id: string): jasmine.Spy => {
+    /* eslint-disable */
     const spy = jasmine.createSpy(id);
     const Mod = require('module');
     const ori = Mod.prototype.require;
@@ -24,360 +13,294 @@ const spyOnRequire = (id: string): jasmine.Spy => {
         return (arguments[0].indexOf(convertedId) !== -1) ? spy() : ori.apply(this, arguments);
     };
     return spy;
+    /* eslint-enable */
 };
 
-const getData = async (): Promise<Data> => {
-    return {
-        empty: await latestVersion(''),
-        string: await latestVersion('npm'),
-        exactRange: await latestVersion('npm@5.0.2'),
-        minorRange: await latestVersion('npm@^5.0.2'),
-        patchRange: await latestVersion('npm@~5.0.2'),
-        collection: await latestVersion(['npm', 'npm@1.3.2', '@scope/name@^5.0.2']),
-        collectionWOfOne: await latestVersion(['npm']),
-        collectionEmpty: await latestVersion([]),
-        json: await latestVersion({
-            dependencies: { 'npm': 'latest' },
-            devDependencies: { 'npm': '1.3.2' },
-            peerDependencies: { '@scope/name': '^5.0.2' }
-        })
-    } as Data;
+interface TestCase {
+    name: string;
+    fakeInstalled?: string;
+    data: Package | Package[] | PackageJson;
+    expect: LatestVersionPackage | LatestVersionPackage[];
+}
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const TO_BE_DEFINED = 'TO_BE_DEFINED';
+
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const TESTS: TestCase[] = [{
+    name: 'Empty package',
+    data: '',
+    expect: {
+        name: '',
+        installed: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: undefined,
+        updatesAvailable: { latest: false, next: false, wanted: false },
+        error: undefined
+    }
+}, {
+    name: 'Package with name only',
+    data: 'npm',
+    expect: {
+        name: 'npm',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: undefined, wantedTagOrRange: undefined,
+        updatesAvailable: { latest: false, next: false, wanted: false },
+        error: undefined
+    }
+}, {
+    name: 'Package with exact range',
+    data: 'npm@5.0.2',
+    expect: {
+        name: 'npm',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '5.0.2', wantedTagOrRange: '5.0.2',
+        updatesAvailable: { latest: false, next: false, wanted: false },
+        error: undefined
+    }
+}, {
+    name: 'Package with minor range',
+    data: 'npm@^5.0.2',
+    expect: {
+        name: 'npm',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '5.10.0', wantedTagOrRange: '^5.0.2',
+        updatesAvailable: { latest: false, next: false, wanted: false },
+        error: undefined
+    }
+}, {
+    name: 'Package with patch range',
+    data: 'npm@~5.0.2',
+    expect: {
+        name: 'npm',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '5.0.4', wantedTagOrRange: '~5.0.2',
+        updatesAvailable: { latest: false, next: false, wanted: false },
+        error: undefined
+    }
+}, {
+    name: 'Package with existing tag',
+    data: 'npm@lts',
+    expect: {
+        name: 'npm',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: TO_BE_DEFINED, wantedTagOrRange: 'lts',
+        updatesAvailable: { latest: false, next: false, wanted: false },
+        error: undefined
+    }
+}, {
+    name: 'Package with non existing tag',
+    data: 'npm@unknown',
+    expect: {
+        name: 'npm',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: undefined, wantedTagOrRange: 'unknown',
+        updatesAvailable: { latest: false, next: false, wanted: false },
+        error: undefined
+    }
+}, {
+    name: 'Package with updates available',
+    fakeInstalled: '5.0.2',
+    data: ['npm', 'npm@5.0.2', 'npm@^5.0.2', 'npm@~5.0.2'],
+    expect: [{
+        name: 'npm',
+        installed: '5.0.2', latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: undefined, wantedTagOrRange: undefined,
+        updatesAvailable: { latest: true, next: true, wanted: false },
+        error: undefined
+    }, {
+        name: 'npm',
+        installed: '5.0.2', latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '5.0.2', wantedTagOrRange: '5.0.2',
+        updatesAvailable: { latest: true, next: true, wanted: false },
+        error: undefined
+    }, {
+        name: 'npm',
+        installed: '5.0.2', latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '5.10.0', wantedTagOrRange: '^5.0.2',
+        updatesAvailable: { latest: true, next: true, wanted: true },
+        error: undefined
+    }, {
+        name: 'npm',
+        installed: '5.0.2', latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '5.0.4', wantedTagOrRange: '~5.0.2',
+        updatesAvailable: { latest: true, next: true, wanted: true },
+        error: undefined
+    }]
+}, {
+    name: 'Empty collection',
+    data: [],
+    expect: []
+}, {
+    name: 'Collection of one package',
+    data: ['npm'],
+    expect: [{
+        name: 'npm',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: undefined, wantedTagOrRange: undefined,
+        updatesAvailable: { latest: false, next: false, wanted: false },
+        error: undefined
+    }]
+}, {
+    name: 'Collection of many packages',
+    data: ['npm', 'npm@1.3.2', '@scope/name@^5.0.2'],
+    expect: [{
+        name: 'npm',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: undefined, wantedTagOrRange: undefined,
+        updatesAvailable: { latest: false, next: false, wanted: false },
+        error: undefined
+    }, {
+        name: 'npm',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '1.3.2', wantedTagOrRange: '1.3.2',
+        updatesAvailable: { latest: false, next: false, wanted: false },
+        error: undefined
+    }, {
+        name: '@scope/name',
+        installed: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: '^5.0.2',
+        updatesAvailable: { latest: false, next: false, wanted: false },
+        error: TO_BE_DEFINED as unknown as Error
+    }]
+}, {
+    name: 'Package.json',
+    data: {
+        dependencies: { npm: 'latest' },
+        devDependencies: { npm: '1.3.2' },
+        peerDependencies: { '@scope/name': '^5.0.2' }
+    },
+    expect: [{
+        name: 'npm',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: TO_BE_DEFINED, wantedTagOrRange: 'latest',
+        updatesAvailable: { latest: false, next: false, wanted: false },
+        error: undefined
+    }, {
+        name: 'npm',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '1.3.2', wantedTagOrRange: '1.3.2',
+        updatesAvailable: { latest: false, next: false, wanted: false },
+        error: undefined
+    }, {
+        name: '@scope/name',
+        installed: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: '^5.0.2',
+        updatesAvailable: { latest: false, next: false, wanted: false },
+        error: TO_BE_DEFINED as unknown as Error
+    }]
+}];
+
+
+const isPackageJson = (obj: any): obj is PackageJson => {
+    return ((obj as PackageJson).dependencies !== undefined) ||
+        ((obj as PackageJson).devDependencies !== undefined) ||
+        ((obj as PackageJson).peerDependencies !== undefined);
+};
+
+const testValue = (actual: any, expected: any, output: string) => {
+    if (expected === TO_BE_DEFINED) {
+        expect(actual).toBeDefined(output);
+    } else if (expected === undefined) {
+        expect(actual).toBeUndefined(output);
+    } else {
+        expect(actual).toBe(expected, output);
+    }
+};
+
+const testPkg = (actual: LatestVersionPackage, expected: LatestVersionPackage, testInstalled = false) => {
+    testValue(actual.name, expected.name, '(pkg.name)');
+    if (testInstalled) {
+        testValue(actual.installed, expected.installed, '(pkg.installed)');
+    }
+    testValue(actual.latest, expected.latest, '(pkg.latest)');
+    testValue(actual.next, expected.next, '(pkg.next)');
+    testValue(actual.wanted, expected.wanted, '(pkg.wanted)');
+    testValue(actual.wantedTagOrRange, expected.wantedTagOrRange, '(pkg.wantedTagOrRange)');
+    testValue(actual.updatesAvailable?.latest, expected.updatesAvailable?.latest, '(pkg.updatesAvailable.latest)');
+    testValue(actual.updatesAvailable?.next, expected.updatesAvailable?.next, '(pkg.updatesAvailable.next)');
+    testValue(actual.updatesAvailable?.wanted, expected.updatesAvailable?.wanted, '(pkg.updatesAvailable.wanted)');
+    testValue(actual.error, expected.error, '(pkg.error)');
 };
 
 describe('@badisi/latest-version', () => {
-    let pkg: Data;
-    let pkgInstalled: Data;
-    let pkgNotInstalled: Data;
-
-    beforeAll(async () => {
-        pkg = await getData();
-        spyOnRequire('npm/package.json').and.returnValue({ version: '5.0.2' });
-        pkgInstalled = await getData();
-        spyOnRequire('npm/package.json').and.returnValue({ version: undefined });
-        pkgNotInstalled = await getData();
-    });
-
-    describe('Test return objects', () => {
-        it('with empty', () => {
-            expect(pkg.empty).toBeUndefined();
-        });
-        it('with package string', () => {
-            expect(Array.isArray(pkg.string)).toBe(false);
-        });
-        it('with package range', () => {
-            expect(Array.isArray(pkg.exactRange)).toBe(false);
-            expect(Array.isArray(pkg.minorRange)).toBe(false);
-            expect(Array.isArray(pkg.patchRange)).toBe(false);
-        });
-        it('with collection', () => {
-            expect(Array.isArray(pkg.collection)).toBe(true);
-            expect(pkg.collection.length).toBe(3);
-        });
-        it('with collection of one', () => {
-            expect(Array.isArray(pkg.collectionWOfOne)).toBe(true);
-            expect(pkg.collectionWOfOne.length).toBe(1);
-        });
-        it('with collection empty', () => {
-            expect(Array.isArray(pkg.collectionEmpty)).toBe(true);
-            expect(pkg.collectionEmpty.length).toBe(0);
-        });
-        it('with package json', () => {
-            expect(Array.isArray(pkg.json)).toBe(true);
-            expect(pkg.json.length).toBe(3);
-        });
-    });
-
-    describe('Test "name"', () => {
-        it('with package string', () => {
-            expect(pkg.string.name).toBe('npm');
-        });
-        it('with package range', () => {
-            expect(pkg.exactRange.name).toBe('npm');
-            expect(pkg.minorRange.name).toBe('npm');
-            expect(pkg.patchRange.name).toBe('npm');
-        });
-        it('with collection', () => {
-            expect(pkg.collection[0].name).toBe('npm');
-            expect(pkg.collection[1].name).toBe('npm');
-            expect(pkg.collection[2].name).toBe('@scope/name');
-        });
-        it('with package json', () => {
-            expect(pkg.json[0].name).toBe('npm');
-            expect(pkg.json[1].name).toBe('npm');
-            expect(pkg.json[2].name).toBe('@scope/name');
-        });
-    });
-
-    describe('Test "range"', () => {
-        it('with package string', () => {
-            expect(pkg.string.range).toBe('latest');
-        });
-        it('with package range', () => {
-            expect(pkg.exactRange.range).toBe('5.0.2');
-            expect(pkg.minorRange.range).toBe('^5.0.2');
-            expect(pkg.patchRange.range).toBe('~5.0.2');
-        });
-        it('with collection', () => {
-            expect(pkg.collection[0].range).toBe('latest');
-            expect(pkg.collection[1].range).toBe('1.3.2');
-            expect(pkg.collection[2].range).toBe('^5.0.2');
-        });
-        it('with package json', () => {
-            expect(pkg.json[0].range).toBe('latest');
-            expect(pkg.json[1].range).toBe('1.3.2');
-            expect(pkg.json[2].range).toBe('^5.0.2');
-        });
-    });
-
-    describe('Test "installed"', () => {
-        describe('..if package not installed', () => {
-            it('with package string', () => {
-                expect(pkgNotInstalled.string.installed).toBeUndefined();
-            });
-            it('with package range', () => {
-                expect(pkgNotInstalled.exactRange.installed).toBeUndefined();
-                expect(pkgNotInstalled.minorRange.installed).toBeUndefined();
-                expect(pkgNotInstalled.patchRange.installed).toBeUndefined();
-            });
-            it('with collection', () => {
-                expect(pkgNotInstalled.collection[0].installed).toBeUndefined();
-                expect(pkgNotInstalled.collection[1].installed).toBeUndefined();
-                expect(pkgNotInstalled.collection[2].installed).toBeUndefined();
-            });
-            it('with package json', () => {
-                expect(pkgNotInstalled.json[0].installed).toBeUndefined();
-                expect(pkgNotInstalled.json[1].installed).toBeUndefined();
-                expect(pkgNotInstalled.json[2].installed).toBeUndefined();
-            });
-        });
-        describe('..if package installed', () => {
-            it('with package string', () => {
-                expect(pkgInstalled.string.installed).toBe('5.0.2');
-            });
-            it('with package range', () => {
-                expect(pkgInstalled.exactRange.installed).toBe('5.0.2');
-                expect(pkgInstalled.minorRange.installed).toBe('5.0.2');
-                expect(pkgInstalled.patchRange.installed).toBe('5.0.2');
-            });
-            it('with collection', () => {
-                expect(pkgInstalled.collection[0].installed).toBe('5.0.2');
-                expect(pkgInstalled.collection[1].installed).toBe('5.0.2');
-                expect(pkgInstalled.collection[2].installed).toBeUndefined();
-            });
-            it('with package json', () => {
-                expect(pkgInstalled.json[0].installed).toBe('5.0.2');
-                expect(pkgInstalled.json[1].installed).toBe('5.0.2');
-                expect(pkgInstalled.json[2].installed).toBeUndefined();
-            });
-        });
-    });
-
-    describe('Test "updateAvailable"', () => {
-        describe('..if package not installed', () => {
-            it('with package string', () => {
-                expect(pkgNotInstalled.string.updateAvailable).toBe(false);
-            });
-            it('with package range', () => {
-                expect(pkgNotInstalled.exactRange.updateAvailable).toBe(false);
-                expect(pkgNotInstalled.minorRange.updateAvailable).toBe(false);
-                expect(pkgNotInstalled.patchRange.updateAvailable).toBe(false);
-            });
-            it('with collection', () => {
-                expect(pkgNotInstalled.collection[0].updateAvailable).toBe(false);
-                expect(pkgNotInstalled.collection[1].updateAvailable).toBe(false);
-                expect(pkgNotInstalled.collection[2].updateAvailable).toBe(false);
-            });
-            it('with package json', () => {
-                expect(pkgNotInstalled.json[0].updateAvailable).toBe(false);
-                expect(pkgNotInstalled.json[1].updateAvailable).toBe(false);
-                expect(pkgNotInstalled.json[2].updateAvailable).toBe(false);
-            });
-        });
-        describe('..if package installed', () => {
-            it('with package string', () => {
-                expect(pkgInstalled.string.updateAvailable).toBe(true);
-            });
-            it('with package range', () => {
-                expect(pkgInstalled.exactRange.updateAvailable).toBe(false);
-                expect(pkgInstalled.minorRange.updateAvailable).toBe(true);
-                expect(pkgInstalled.patchRange.updateAvailable).toBe(true);
-            });
-            it('with collection', () => {
-                expect(pkgInstalled.collection[0].updateAvailable).toBe(true);
-                expect(pkgInstalled.collection[1].updateAvailable).toBe(false);
-                expect(pkgInstalled.collection[2].updateAvailable).toBe(false);
-            });
-            it('with package json', () => {
-                expect(pkgInstalled.json[0].updateAvailable).toBe(true);
-                expect(pkgInstalled.json[1].updateAvailable).toBe(false);
-                expect(pkgInstalled.json[2].updateAvailable).toBe(false);
-            });
-        });
-    });
-
-    describe('Test "latest"', () => {
-        it('with package string', () => {
-            expect(pkg.string.latest).toBeDefined();
-        });
-        it('with package range', () => {
-            expect(pkg.exactRange.latest).toBe(pkg.string.latest);
-            expect(pkg.minorRange.latest).toBe(pkg.string.latest);
-            expect(pkg.patchRange.latest).toBe(pkg.string.latest);
-        });
-        it('with collection', () => {
-            expect(pkg.collection[0].latest).toBe(pkg.string.latest);
-            expect(pkg.collection[1].latest).toBe(pkg.string.latest);
-            expect(pkg.collection[2].latest).toBeUndefined();
-        });
-        it('with package json', () => {
-            expect(pkg.json[0].latest).toBe(pkg.string.latest);
-            expect(pkg.json[1].latest).toBe(pkg.string.latest);
-            expect(pkg.json[2].latest).toBeUndefined();
-        });
-    });
-
-    describe('Test "latestRange"', () => {
-        it('with package string', () => {
-            expect(pkg.string.latestRange).toBe(pkg.string.latest);
-        });
-        it('with package range', () => {
-            expect(pkg.exactRange.latestRange).toBe('5.0.2');
-            expect(pkg.minorRange.latestRange).toBe('5.10.0');
-            expect(pkg.patchRange.latestRange).toBe('5.0.4');
-        });
-        it('with collection', () => {
-            expect(pkg.collection[0].latestRange).toBe(pkg.json[0].latest);
-            expect(pkg.collection[1].latestRange).toBe('1.3.2');
-            expect(pkg.collection[2].latestRange).toBeUndefined();
-        });
-        it('with package json', () => {
-            expect(pkg.json[0].latestRange).toBe(pkg.json[0].latest);
-            expect(pkg.json[1].latestRange).toBe('1.3.2');
-            expect(pkg.json[2].latestRange).toBeUndefined();
-        });
-    });
-
-    describe('Test "error"', () => {
-        describe('..if package not installed', () => {
-            it('with package string', () => {
-                expect(pkgInstalled.string.error).toBeUndefined();
-            });
-            it('with package range', () => {
-                expect(pkgInstalled.exactRange.error).toBeUndefined();
-                expect(pkgInstalled.minorRange.error).toBeUndefined();
-                expect(pkgInstalled.patchRange.error).toBeUndefined();
-            });
-            it('with collection', () => {
-                expect(pkgInstalled.collection[0].error).toBeUndefined();
-                expect(pkgInstalled.collection[1].error).toBeUndefined();
-                expect(pkgInstalled.collection[2].error).toBeDefined();
-            });
-            it('with package json', () => {
-                expect(pkgInstalled.json[0].error).toBeUndefined();
-                expect(pkgInstalled.json[1].error).toBeUndefined();
-                expect(pkgInstalled.json[2].error).toBeDefined();
-            });
-        });
-        describe('..if package installed', () => {
-            it('with package string', () => {
-                expect(pkgInstalled.string.error).toBeUndefined();
-            });
-            it('with package range', () => {
-                expect(pkgInstalled.exactRange.error).toBeUndefined();
-                expect(pkgInstalled.minorRange.error).toBeUndefined();
-                expect(pkgInstalled.patchRange.error).toBeUndefined();
-            });
-            it('with collection', () => {
-                expect(pkgInstalled.collection[0].error).toBeUndefined();
-                expect(pkgInstalled.collection[1].error).toBeUndefined();
-                expect(pkgInstalled.collection[2].error).toBeDefined();
-            });
-            it('with package json', () => {
-                expect(pkgInstalled.json[0].error).toBeUndefined();
-                expect(pkgInstalled.json[1].error).toBeUndefined();
-                expect(pkgInstalled.json[2].error).toBeDefined();
-            });
-        });
-    });
-
     describe('Test cache', () => {
-        let cacheDir = rewire('./index').__get__('getCacheDir')();
-        describe('..if useCache=false', () => {
-            let pkg: LatestVersionPackage;
-            beforeEach((done) => {
+        const cacheDir = rewire('./index')['__get__']('getCacheDir')();
+        describe('useCache=false', () => {
+            beforeAll((done) => {
                 rmSync(cacheDir, { recursive: true, force: true });
-                latestVersion('npm')
-                    .then((value: LatestVersionPackage) => {
-                        pkg = value;
+                void latestVersion(['npm', '@badisi/latest-version'], { useCache: false })
+                    .then(() => {
                         setTimeout(() => done(), 1000); // give time for the cache to be persisted
                     });
             });
             it('no cache should be created', () => {
-                expect(existsSync(join(cacheDir, 'npm.json'))).toBe(false);
-                expect(pkg).toBeDefined();
+                expect(existsSync(join(cacheDir, 'npm.json'))).toBe(false, 'package');
+                expect(existsSync(join(cacheDir, '@badisi/latest-version.json'))).toBe(false, 'scoped package');
             });
         });
-        describe('..if useCache=true', () => {
-            let pkg: LatestVersionPackage;
+        describe('useCache=true', () => {
+            let pkgsCached: LatestVersionPackage[];
             beforeEach((done) => {
                 rmSync(cacheDir, { recursive: true, force: true });
-                latestVersion('@badisi/latest-version', { useCache: true })
-                    .then((value: LatestVersionPackage) => {
-                        pkg = value;
+                void latestVersion(['npm@^5.0.2', '@badisi/latest-version'], { useCache: true })
+                    .then((value: LatestVersionPackage[]) => {
+                        pkgsCached = value;
                         setTimeout(() => done(), 1000); // give time for the cache to be persisted
                     });
             });
-            it('first call -> data should be undefined and returned immediately', async () => {
-                expect(pkg).toBeDefined();
-                expect(pkg.name).toBe('@badisi/latest-version');
-                expect(pkg.latest).toBeUndefined();
-                expect(pkg.latestRange).toBeUndefined();
+            it('first call -> data should be undefined and returned immediately', () => {
+                testPkg(pkgsCached[0], {
+                    name: 'npm',
+                    installed: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: '^5.0.2',
+                    updatesAvailable: { latest: false, next: false, wanted: false },
+                    error: undefined
+                });
+                testPkg(pkgsCached[1], {
+                    name: '@badisi/latest-version',
+                    installed: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: undefined,
+                    updatesAvailable: { latest: false, next: false, wanted: false },
+                    error: undefined
+                });
             });
-            it('first call -> a cache file should be created', async () => {
-                expect(existsSync(join(cacheDir, '@badisi/latest-version.json'))).toBe(true);
+            it('first call -> a cache file should be created', () => {
+                expect(existsSync(join(cacheDir, 'npm.json'))).toBe(true, 'package');
+                expect(existsSync(join(cacheDir, '@badisi/latest-version.json'))).toBe(true, 'scoped package');
             });
             it('second call -> data should be defined and returned immediately', (done) => {
-                latestVersion('@badisi/latest-version', { useCache: true })
-                    .then((value: LatestVersionPackage) => {
-                        pkg = value;
+                void latestVersion(['npm@^5.0.2', '@badisi/latest-version'], { useCache: true })
+                    .then((value: LatestVersionPackage[]) => {
                         setTimeout(() => {
-                            expect(pkg).toBeDefined();
-                            expect(pkg.name).toBe('@badisi/latest-version');
-                            expect(pkg.latest).toBeDefined();
-                            expect(pkg.latestRange).toBeDefined();
+                            testPkg(value[0], {
+                                name: 'npm',
+                                installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '5.10.0', wantedTagOrRange: '^5.0.2',
+                                updatesAvailable: { latest: false, next: false, wanted: false },
+                                error: undefined
+                            });
+                            testPkg(value[1], {
+                                name: '@badisi/latest-version',
+                                installed: undefined, latest: TO_BE_DEFINED, next: undefined, wanted: undefined, wantedTagOrRange: undefined,
+                                updatesAvailable: { latest: false, next: false, wanted: false },
+                                error: undefined
+                            });
                             done();
                         }, 1000); // give time for the cache to be persisted
                     });
             });
         });
-        describe('..if cacheMaxAge=0', () => {
-            let pkg: LatestVersionPackage;
+        describe('cacheMaxAge=0', () => {
             beforeEach((done) => {
                 rmSync(cacheDir, { recursive: true, force: true });
-                latestVersion('@badisi/latest-version', { useCache: true })
-                    .then((value: LatestVersionPackage) => {
-                        pkg = value;
+                void latestVersion(['npm@^5.0.2', '@badisi/latest-version'], { useCache: true })
+                    .then(() => {
                         setTimeout(() => done(), 1000); // give time for the cache to be persisted
                     });
             });
             it('second call with cacheMaxAge=0 -> data should be undefined and returned immediately', (done) => {
-                latestVersion('@badisi/latest-version', { useCache: true, cacheMaxAge: 0 })
-                    .then((value: LatestVersionPackage) => {
-                        pkg = value;
+                void latestVersion(['npm@^5.0.2', '@badisi/latest-version'], { useCache: true, cacheMaxAge: 0 })
+                    .then((value: LatestVersionPackage[]) => {
                         setTimeout(() => {
-                            expect(pkg).toBeDefined();
-                            expect(pkg.name).toBe('@badisi/latest-version');
-                            expect(pkg.latest).toBeUndefined();
-                            expect(pkg.latestRange).toBeUndefined();
+                            testPkg(value[0], {
+                                name: 'npm',
+                                installed: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: '^5.0.2',
+                                updatesAvailable: { latest: false, next: false, wanted: false },
+                                error: undefined
+                            });
+                            testPkg(value[1], {
+                                name: '@badisi/latest-version',
+                                installed: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: undefined,
+                                updatesAvailable: { latest: false, next: false, wanted: false },
+                                error: undefined
+                            });
                             done();
                         }, 1000); // give time for the cache to be persisted
                     });
             });
             it('second call with cacheMaxAge=0 -> lastUpdateDate should be updated', (done) => {
                 const { lastUpdateDate: before } = JSON.parse(readFileSync(join(cacheDir, '@badisi/latest-version.json')).toString());
-                latestVersion('@badisi/latest-version', { useCache: true, cacheMaxAge: 0 })
-                    .then((value: LatestVersionPackage) => {
-                        pkg = value;
+                void latestVersion('@badisi/latest-version', { useCache: true, cacheMaxAge: 0 })
+                    .then(() => {
                         setTimeout(() => {
                             const { lastUpdateDate: after } = JSON.parse(readFileSync(join(cacheDir, '@badisi/latest-version.json')).toString());
                             expect(before).toBeLessThan(after);
@@ -385,6 +308,67 @@ describe('@badisi/latest-version', () => {
                         }, 1000); // give time for the cache to be persisted
                     });
             });
+        });
+    });
+
+    TESTS.forEach((test: TestCase) => {
+        describe(test.name, () => {
+            let result: LatestVersionPackage | LatestVersionPackage[];
+
+            beforeAll(async () => {
+                if (test.fakeInstalled) {
+                    spyOnRequire('npm/package.json').and.returnValue({ version: test.fakeInstalled });
+                } else {
+                    spyOnRequire('npm/package.json').and.returnValue({ version: undefined });
+                }
+
+                if (typeof test.data === 'string') {
+                    result = await latestVersion(test.data);
+                } else if (Array.isArray(test.data)) {
+                    const pkgs = test.data;
+                    result = await latestVersion(pkgs);
+                } else if (isPackageJson(test.data)) {
+                    const pkgs = test.data;
+                    result = await latestVersion(pkgs);
+                }
+            });
+
+            if (typeof test.data === 'string') {
+                it('returned type', () => {
+                    expect(Array.isArray(result)).toBe(false);
+                });
+                it(`'${test.data}'`, () => {
+                    testPkg(result as LatestVersionPackage, test.expect as LatestVersionPackage, !!test.fakeInstalled);
+                });
+            } else if (Array.isArray(test.data)) {
+                it('returned type', () => {
+                    expect(Array.isArray(result)).toBe(true);
+                });
+                it('returned length', () => {
+                    expect((result as LatestVersionPackage[]).length).toBe((test.expect as LatestVersionPackage[]).length);
+                });
+                for (let i = 0; i < test.data.length; i++) {
+                    it(`'${test.data[i]}'`, () => {
+                        testPkg((result as LatestVersionPackage[])[i], (test.expect as LatestVersionPackage[])[i], !!test.fakeInstalled);
+                    });
+                }
+            } else if (isPackageJson(test.data)) {
+                const testData: Package[] = [];
+                [test.data.dependencies, test.data.devDependencies, test.data.peerDependencies].forEach((deps) => {
+                    testData.push(...Object.keys(deps).map((key: string) => `${key}@${deps[key]}`));
+                });
+                it('returned type', () => {
+                    expect(Array.isArray(result)).toBe(true);
+                });
+                it('returned length', () => {
+                    expect((result as LatestVersionPackage[]).length).toBe(testData.length);
+                });
+                for (let i = 0; i < testData.length; i++) {
+                    it(`'${testData[i]}'`, () => {
+                        testPkg((result as LatestVersionPackage[])[i], (test.expect as LatestVersionPackage[])[i], !!test.fakeInstalled);
+                    });
+                }
+            }
         });
     });
 });
