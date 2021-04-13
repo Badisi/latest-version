@@ -17,7 +17,7 @@
 
 * Get latest versions of packages *(from package registries)*
   * `latest`, `next` and `wanted` if a version range or a tag is provided
-* Get `installed` version of packages *(local or global)*
+* Get `installed` version of packages *(if installed locally or globally)*
 * Check if `updates` are available
 * Cache support to increase data retrieval performance
 * Support public/private repositories and proxies
