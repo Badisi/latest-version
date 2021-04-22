@@ -1,6 +1,13 @@
 name: CI tests
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches:
+    - '**'
+    tags-ignore:
+    - '**'
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   ci_tests_macos:
