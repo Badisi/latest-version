@@ -34,7 +34,7 @@ You can test the library while developing it, as follow:
 2. Run the test file with *ts-node*
 
    ```sh
-   $ ./node_modules/.bin/ts-node test.ts
+   $ npx ts-node test.ts
    ```
 
 ## Unit testing
