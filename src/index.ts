@@ -256,12 +256,12 @@ const getMetadataFromCache = (pkgName: string, options?: LatestVersionOptions): 
     return undefined;
 };
 
-const getLatestVersions = async (pkgName: string, tagOrRange?: string, options?: LatestVersionOptions): Promise<LatestVersions> => {
+const getLatestVersions = async (pkgName: string, tagOrRange?: string, options?: LatestVersionOptions): Promise<LatestVersions | void> => {
     let pkgMetadata: PackageMetadata | undefined;
     if (pkgName.length && options?.useCache) {
         pkgMetadata = getMetadataFromCache(pkgName, options);
         if (!pkgMetadata) {
-            downloadMetadata(pkgName, options).then(saveMetadataToCache).catch((err) => { throw err; });
+            return downloadMetadata(pkgName, options).then(saveMetadataToCache);
         }
     } else if (pkgName.length) {
         pkgMetadata = await downloadMetadata(pkgName, options);

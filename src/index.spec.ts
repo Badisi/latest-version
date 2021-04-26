@@ -226,7 +226,7 @@ describe('@badisi/latest-version', () => {
             beforeEach((done) => {
                 rmSync(cacheDir, { recursive: true, force: true });
                 spyOnRequire('npm/package.json').and.returnValue({ version: undefined });
-                void latestVersion(['npm@^5.0.2', '@badisi/latest-version'], { useCache: true })
+                void latestVersion(['npm@^5.0.2', '@badisi/latest-version', '@scope/name'], { useCache: true })
                     .then((value: LatestVersionPackage[]) => {
                         pkgsCached = value;
                         setTimeout(() => done(), 1000); // give time for the cache to be persisted
@@ -245,13 +245,20 @@ describe('@badisi/latest-version', () => {
                     updatesAvailable: { latest: false, next: false, wanted: false },
                     error: undefined
                 });
+                testPkg(pkgsCached[2], {
+                    name: '@scope/name',
+                    installed: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: undefined,
+                    updatesAvailable: { latest: false, next: false, wanted: false },
+                    error: TO_BE_DEFINED as unknown as Error
+                });
             });
             it('first call -> a cache file should be created', () => {
                 expect(existsSync(join(cacheDir, 'npm.json'))).toBe(true, 'package');
                 expect(existsSync(join(cacheDir, '@badisi/latest-version.json'))).toBe(true, 'scoped package');
+                expect(existsSync(join(cacheDir, '@scope/name.json'))).toBe(false, 'non existing package');
             });
             it('second call -> data should be defined and returned immediately', (done) => {
-                void latestVersion(['npm@^5.0.2', '@badisi/latest-version'], { useCache: true })
+                void latestVersion(['npm@^5.0.2', '@badisi/latest-version', '@scope/name'], { useCache: true })
                     .then((value: LatestVersionPackage[]) => {
                         setTimeout(() => {
                             testPkg(value[0], {
@@ -265,6 +272,12 @@ describe('@badisi/latest-version', () => {
                                 installed: undefined, latest: TO_BE_DEFINED, next: undefined, wanted: undefined, wantedTagOrRange: undefined,
                                 updatesAvailable: { latest: false, next: false, wanted: false },
                                 error: undefined
+                            });
+                            testPkg(value[2], {
+                                name: '@scope/name',
+                                installed: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: undefined,
+                                updatesAvailable: { latest: false, next: false, wanted: false },
+                                error: TO_BE_DEFINED as unknown as Error
                             });
                             done();
                         }, 1000); // give time for the cache to be persisted
