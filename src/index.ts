@@ -1,8 +1,8 @@
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import registryAuthToken from 'registry-auth-token';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { RequestOptions as HttpRequestOptions, Agent, IncomingMessage } from 'node:http';
-import { RequestOptions as HttpsRequestOptions } from 'node:https';
+import { RequestOptions as HttpRequestOptions, Agent, IncomingMessage } from 'http';
+import { RequestOptions as HttpsRequestOptions } from 'https';
 import { gt, maxSatisfying } from 'semver';
 import { npm, yarn } from 'global-dirs';
 import { join, dirname } from 'path';
