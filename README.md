@@ -42,16 +42,16 @@ const latestVersion = require('@badisi/latest-version');
 
 (async () => {
     // Single package
-    await latestVersion('npm');
+    const pkg = await latestVersion('npm');
 
     // List of packages
-    await latestVersion(['npm', 'npm@1.3.2', 'npm@beta', '@scope/name@^5.0.2']);
+    const pkgs = await latestVersion(['npm', 'npm@1.3.2', 'npm@beta', '@scope/name@^5.0.2']);
 
     // Package.json
-    await latestVersion(JSON.parse(readFileSync('package.json')));
+    const pkgs = await latestVersion(JSON.parse(readFileSync('package.json')));
 
     // Using cache
-    await latestVersion('npm@^5.0.2', { useCache: true });
+    const pkg = await latestVersion('npm@^5.0.2', { useCache: true });
 })();
 ```
 
