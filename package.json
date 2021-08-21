@@ -39,22 +39,22 @@
         "semver": "^7.3.5"
     },
     "devDependencies": {
-        "@types/jasmine": "^3.7.7",
-        "@types/node": "^15.12.4",
-        "@types/registry-auth-token": "^4.2.0",
+        "@types/jasmine": "^3.8.2",
+        "@types/node": "^16.7.1",
+        "@types/registry-auth-token": "^4.2.1",
         "@types/rewire": "^2.5.28",
-        "@types/semver": "^7.3.6",
-        "@typescript-eslint/eslint-plugin": "^4.28.0",
-        "@typescript-eslint/parser": "^4.28.0",
-        "eslint": "^7.29.0",
-        "eslint-plugin-import": "^2.23.4",
-        "eslint-plugin-jsdoc": "^35.4.0",
+        "@types/semver": "^7.3.8",
+        "@typescript-eslint/eslint-plugin": "^4.29.2",
+        "@typescript-eslint/parser": "^4.29.2",
+        "eslint": "^7.32.0",
+        "eslint-plugin-import": "^2.24.1",
+        "eslint-plugin-jsdoc": "^36.0.7",
         "eslint-plugin-prefer-arrow": "^1.2.3",
         "fs-extra": "^10.0.0",
-        "jasmine": "^3.7.0",
+        "jasmine": "^3.9.0",
         "jasmine-spec-reporter": "^7.0.0",
         "rewire": "^5.0.0",
-        "ts-node": "^10.0.0",
-        "typescript": "^4.3.4"
+        "ts-node": "^10.2.1",
+        "typescript": "^4.3.5"
     }
 }
