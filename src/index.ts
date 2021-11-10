@@ -206,7 +206,7 @@ const downloadMetadata = (pkgName: string, options?: LatestVersionOptions): Prom
                         return resolve({
                             name: pkgName,
                             lastUpdateDate: Date.now(),
-                            versions: Object.keys(pkgMetadata.versions),
+                            versions: Object.keys(pkgMetadata.versions as string[]),
                             distTags: pkgMetadata['dist-tags']
                         });
                     } catch (err) {
@@ -326,9 +326,9 @@ const latestVersion: LatestVersion = async (arg: Package | Package[] | PackageJs
                 pkgs.push(...Object.keys(deps).map((key: string) => `${key}@${deps[key]}`));
             }
         };
-        addDeps(arg.dependencies);
-        addDeps(arg.devDependencies);
-        addDeps(arg.peerDependencies);
+        addDeps(arg.dependencies as PackageJsonDependencies);
+        addDeps(arg.devDependencies as PackageJsonDependencies);
+        addDeps(arg.peerDependencies as PackageJsonDependencies);
     }
 
     const jobs = await Promise.allSettled(pkgs.map((pkg: string) => getInfo(pkg, options)));
