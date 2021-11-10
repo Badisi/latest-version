@@ -299,9 +299,9 @@ The content of the commit message body should contain:
 
 
 
-[coc]: https://github.com/DSI-HUG/ngx-sentry/blob/master/CODE_OF_CONDUCT.md
-[github]: https://github.com/DSI-HUG/ngx-sentry
-[issue-templates]: https://github.com/DSI-HUG/ngx-sentry/issues/new/choose
+[coc]: https://github.com/badisi/latest-version/blob/master/CODE_OF_CONDUCT.md
+[github]: https://github.com/badisi/latest-version
+[issue-templates]: https://github.com/badisi/latest-version/issues/new/choose
 [github-pr]: https://github.com/angular/angular/pulls
 [js-style-guide]: https://google.github.io/styleguide/jsguide.html
 [commit-message-format]: https://www.conventionalcommits.org/en/v1.0.0
