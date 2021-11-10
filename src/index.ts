@@ -307,8 +307,8 @@ const getInfo = async (pkg: Package, options?: LatestVersionOptions): Promise<La
             next: (pkgInfo.installed && pkgInfo.next) ? gt(pkgInfo.next, pkgInfo.installed) : false,
             wanted: (pkgInfo.installed && pkgInfo.wanted) ? gt(pkgInfo.wanted, pkgInfo.installed) : false
         };
-    } catch (err) {
-        pkgInfo.error = err.message || err;
+    } catch (err: any) {
+        pkgInfo.error = err?.message || err;
     }
 
     return pkgInfo;

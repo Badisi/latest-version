@@ -3,19 +3,19 @@
         "outDir": "./dist",
         "target": "es2019",
         "lib": [
-            "es2020"
+            "es2018"
         ],
         "module": "commonjs",
         "moduleResolution": "node",
         "types": [
-            "jasmine",
-            "node"
+            "node",
+            "jasmine"
         ],
         "resolveJsonModule": true,
         "esModuleInterop": true,
         "importHelpers": true,
-        "strictPropertyInitialization": false,
-        "noUnusedLocals": false,
+        "strictPropertyInitialization": true,
+        "noUnusedLocals": true,
         "declaration": true,
         "strict": true,
         "pretty": true

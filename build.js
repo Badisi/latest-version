@@ -1,45 +1,75 @@
-const { existsSync, mkdirSync, rmSync, copySync } = require('fs-extra');
+const { existsSync, mkdirSync, rmSync, readFileSync, writeFileSync } = require('fs');
 const { resolve: pathResolve } = require('path');
+const { green, magenta } = require('colors/safe');
 const { exec } = require('child_process');
+const cpy = require('cpy');
 
-const DIST_PATH = './dist';
+const DIST_PATH = pathResolve(__dirname, 'dist');
 const LIB_ASSETS = [
-    'README.md',
-    'LICENSE',
-    'package.json'
+    pathResolve(__dirname, 'README.md'),
+    pathResolve(__dirname, 'LICENSE'),
+    pathResolve(__dirname, 'package.json')
 ];
 
-function execCmd(cmd) {
-    return new Promise((resolve, reject) => {
-        exec(cmd, (err, stdout, stderr) => {
-            if (err) {
-                console.error(stdout, stderr);
-                return reject(err);
-            }
-            return resolve();
-        });
+const log = str => console.log(magenta(str));
+
+const execCmd = (cmd, opts) => new Promise((resolve, reject) => {
+    exec(cmd, opts, (err, stdout, stderr) => {
+        if (err) {
+            console.error(stdout, stderr);
+            return reject(err);
+        }
+        return resolve(stdout);
     });
-}
+});
 
-function clean(path) {
-    if (existsSync(path)) {
-        rmSync(path, { recursive: true });
+const cleanDir = path => new Promise(resolve => {
+    const exists = existsSync(path);
+    if (exists) {
+        rmSync(path, { recursive: true, cwd: __dirname });
     }
-    mkdirSync(path, { recursive: true });
-}
+    // Gives time to rmSync to unlock the file on Windows
+    setTimeout(() => {
+        mkdirSync(path, { recursive: true, cwd: __dirname });
+        resolve();
+    }, exists ? 1000 : 0);
+});
 
-(async function main() {
+const copyAssets = () => cpy(
+    LIB_ASSETS,
+    DIST_PATH,
+    {
+        expandDirectories: true
+    }
+);
+
+const customizePackageJson = async () => {
+    const pkgJsonPath = pathResolve(DIST_PATH, 'package.json');
+    const pkgJson = JSON.parse(readFileSync(pkgJsonPath, { encoding: 'utf8' }));
+    delete pkgJson.scripts;
+    delete pkgJson.devDependencies;
+    writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 4), { encoding: 'utf8' });
+};
+
+const build = async () => {
+    log('> Cleaning..');
+    await cleanDir(DIST_PATH);
+
+    log('> Building library..');
+    await execCmd('tsc --project tsconfig.json', { cwd: __dirname });
+
+    log('> Copying assets..');
+    await copyAssets();
+
+    log('> Customizing package.json..');
+    await customizePackageJson();
+
+    log(`> ${green('Done!')}\n`);
+};
+
+(async () => {
     try {
-        console.log('> Cleaning..');
-        clean(DIST_PATH);
-
-        console.log('> Transpiling..');
-        await execCmd('tsc');
-
-        console.log('> Copying assets..');
-        LIB_ASSETS.forEach(file => copySync(file, pathResolve(DIST_PATH, file), { recursive: true }));
-
-        console.log('> Done!');
+        await build();
     } catch (err) {
         console.error(err);
         process.exit(1);
