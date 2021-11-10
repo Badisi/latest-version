@@ -1,7 +1,8 @@
-import latestVersion, { Package, PackageJson, LatestVersionPackage } from './index';
 import { existsSync, readFileSync, rmSync } from 'fs';
 import { join } from 'path';
 import rewire from 'rewire';
+
+import latestVersion, { Package, PackageJson, LatestVersionPackage } from './index';
 
 const spyOnRequire = (id: string): jasmine.Spy => {
     /* eslint-disable */
@@ -38,80 +39,80 @@ const TESTS: TestCase[] = [{
     }
 }, {
     name: 'Package with name only',
-    data: 'npm',
+    data: 'typescript',
     expect: {
-        name: 'npm',
+        name: 'typescript',
         installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: undefined, wantedTagOrRange: undefined,
         updatesAvailable: { latest: false, next: false, wanted: false },
         error: undefined
     }
 }, {
     name: 'Package with exact range',
-    data: 'npm@5.0.2',
+    data: 'typescript@3.6.2',
     expect: {
-        name: 'npm',
-        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '5.0.2', wantedTagOrRange: '5.0.2',
+        name: 'typescript',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '3.6.2', wantedTagOrRange: '3.6.2',
         updatesAvailable: { latest: false, next: false, wanted: false },
         error: undefined
     }
 }, {
     name: 'Package with minor range',
-    data: 'npm@^5.0.2',
+    data: 'typescript@^3.6.2',
     expect: {
-        name: 'npm',
-        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '5.10.0', wantedTagOrRange: '^5.0.2',
+        name: 'typescript',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '3.9.10', wantedTagOrRange: '^3.6.2',
         updatesAvailable: { latest: false, next: false, wanted: false },
         error: undefined
     }
 }, {
     name: 'Package with patch range',
-    data: 'npm@~5.0.2',
+    data: 'typescript@~3.6.2',
     expect: {
-        name: 'npm',
-        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '5.0.4', wantedTagOrRange: '~5.0.2',
+        name: 'typescript',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '3.6.5', wantedTagOrRange: '~3.6.2',
         updatesAvailable: { latest: false, next: false, wanted: false },
         error: undefined
     }
 }, {
     name: 'Package with existing tag',
-    data: 'npm@lts',
+    data: 'typescript@beta',
     expect: {
-        name: 'npm',
-        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: TO_BE_DEFINED, wantedTagOrRange: 'lts',
+        name: 'typescript',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: TO_BE_DEFINED, wantedTagOrRange: 'beta',
         updatesAvailable: { latest: false, next: false, wanted: false },
         error: undefined
     }
 }, {
     name: 'Package with non existing tag',
-    data: 'npm@unknown',
+    data: 'typescript@unknown',
     expect: {
-        name: 'npm',
+        name: 'typescript',
         installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: undefined, wantedTagOrRange: 'unknown',
         updatesAvailable: { latest: false, next: false, wanted: false },
         error: undefined
     }
 }, {
     name: 'Package with updates available',
-    fakeInstalled: '5.0.2',
-    data: ['npm', 'npm@5.0.2', 'npm@^5.0.2', 'npm@~5.0.2'],
+    fakeInstalled: '3.6.2',
+    data: ['typescript', 'typescript@3.6.2', 'typescript@^3.6.2', 'typescript@~3.6.2'],
     expect: [{
-        name: 'npm',
-        installed: '5.0.2', latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: undefined, wantedTagOrRange: undefined,
+        name: 'typescript',
+        installed: '3.6.2', latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: undefined, wantedTagOrRange: undefined,
         updatesAvailable: { latest: true, next: true, wanted: false },
         error: undefined
     }, {
-        name: 'npm',
-        installed: '5.0.2', latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '5.0.2', wantedTagOrRange: '5.0.2',
+        name: 'typescript',
+        installed: '3.6.2', latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '3.6.2', wantedTagOrRange: '3.6.2',
         updatesAvailable: { latest: true, next: true, wanted: false },
         error: undefined
     }, {
-        name: 'npm',
-        installed: '5.0.2', latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '5.10.0', wantedTagOrRange: '^5.0.2',
+        name: 'typescript',
+        installed: '3.6.2', latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '3.9.10', wantedTagOrRange: '^3.6.2',
         updatesAvailable: { latest: true, next: true, wanted: true },
         error: undefined
     }, {
-        name: 'npm',
-        installed: '5.0.2', latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '5.0.4', wantedTagOrRange: '~5.0.2',
+        name: 'typescript',
+        installed: '3.6.2', latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '3.6.5', wantedTagOrRange: '~3.6.2',
         updatesAvailable: { latest: true, next: true, wanted: true },
         error: undefined
     }]
@@ -124,21 +125,21 @@ const TESTS: TestCase[] = [{
     data: ['npm'],
     expect: [{
         name: 'npm',
-        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: undefined, wantedTagOrRange: undefined,
+        installed: undefined, latest: TO_BE_DEFINED, next: undefined, wanted: undefined, wantedTagOrRange: undefined,
         updatesAvailable: { latest: false, next: false, wanted: false },
         error: undefined
     }]
 }, {
     name: 'Collection of many packages',
-    data: ['npm', 'npm@1.3.2', '@scope/name@^5.0.2'],
+    data: ['typescript', 'typescript@1.6.2', '@scope/name@^5.0.2'],
     expect: [{
-        name: 'npm',
+        name: 'typescript',
         installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: undefined, wantedTagOrRange: undefined,
         updatesAvailable: { latest: false, next: false, wanted: false },
         error: undefined
     }, {
-        name: 'npm',
-        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '1.3.2', wantedTagOrRange: '1.3.2',
+        name: 'typescript',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '1.6.2', wantedTagOrRange: '1.6.2',
         updatesAvailable: { latest: false, next: false, wanted: false },
         error: undefined
     }, {
@@ -150,18 +151,18 @@ const TESTS: TestCase[] = [{
 }, {
     name: 'Package.json',
     data: {
-        dependencies: { npm: 'latest' },
-        devDependencies: { npm: '1.3.2' },
+        dependencies: { typescript: 'latest' },
+        devDependencies: { typescript: '1.6.2' },
         peerDependencies: { '@scope/name': '^5.0.2' }
     },
     expect: [{
-        name: 'npm',
+        name: 'typescript',
         installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: TO_BE_DEFINED, wantedTagOrRange: 'latest',
         updatesAvailable: { latest: false, next: false, wanted: false },
         error: undefined
     }, {
-        name: 'npm',
-        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '1.3.2', wantedTagOrRange: '1.3.2',
+        name: 'typescript',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '1.6.2', wantedTagOrRange: '1.6.2',
         updatesAvailable: { latest: false, next: false, wanted: false },
         error: undefined
     }, {
@@ -263,7 +264,7 @@ describe('@badisi/latest-version', () => {
                         setTimeout(() => {
                             testPkg(value[0], {
                                 name: 'npm',
-                                installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: '5.10.0', wantedTagOrRange: '^5.0.2',
+                                installed: undefined, latest: TO_BE_DEFINED, next: undefined, wanted: '5.10.0', wantedTagOrRange: '^5.0.2',
                                 updatesAvailable: { latest: false, next: false, wanted: false },
                                 error: undefined
                             });
@@ -333,9 +334,9 @@ describe('@badisi/latest-version', () => {
 
             beforeAll(async () => {
                 if (test.fakeInstalled) {
-                    spyOnRequire('npm/package.json').and.returnValue({ version: test.fakeInstalled });
+                    spyOnRequire(`typescript/package.json`).and.returnValue({ version: test.fakeInstalled });
                 } else {
-                    spyOnRequire('npm/package.json').and.returnValue({ version: undefined });
+                    spyOnRequire(`typescript/package.json`).and.returnValue({ version: undefined });
                 }
 
                 if (typeof test.data === 'string') {
