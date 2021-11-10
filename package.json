@@ -2,7 +2,7 @@
     "name": "@badisi/latest-version",
     "version": "2.0.4",
     "description": "Get latest versions of packages",
-    "homepage": "https://github.com/Badisi/latest-version",
+    "homepage": "https://github.com/badisi/latest-version",
     "license": "MIT",
     "author": {
         "name": "Badisi"
@@ -11,7 +11,7 @@
     "types": "./index.d.ts",
     "repository": {
         "type": "git",
-        "url": "https://github.com/Badisi/latest-version.git"
+        "url": "https://github.com/badisi/latest-version.git"
     },
     "keywords": [
         "npm",
@@ -39,22 +39,23 @@
         "semver": "^7.3.5"
     },
     "devDependencies": {
-        "@types/jasmine": "^3.8.2",
-        "@types/node": "^16.7.1",
+        "@types/jasmine": "^3.10.2",
+        "@types/node": "^16.11.7",
         "@types/registry-auth-token": "^4.2.1",
         "@types/rewire": "^2.5.28",
-        "@types/semver": "^7.3.8",
-        "@typescript-eslint/eslint-plugin": "^4.29.2",
-        "@typescript-eslint/parser": "^4.29.2",
-        "eslint": "^7.32.0",
-        "eslint-plugin-import": "^2.24.1",
-        "eslint-plugin-jsdoc": "^36.0.7",
+        "@types/semver": "^7.3.9",
+        "@typescript-eslint/eslint-plugin": "^5.3.1",
+        "@typescript-eslint/parser": "^5.3.1",
+        "cpy": "^8.1.2",
+        "eslint": "^8.2.0",
+        "eslint-plugin-import": "^2.25.3",
+        "eslint-plugin-jsdoc": "^37.0.3",
         "eslint-plugin-prefer-arrow": "^1.2.3",
         "fs-extra": "^10.0.0",
-        "jasmine": "^3.9.0",
+        "jasmine": "^3.10.0",
         "jasmine-spec-reporter": "^7.0.0",
         "rewire": "^5.0.0",
-        "ts-node": "^10.2.1",
-        "typescript": "^4.3.5"
+        "ts-node": "^10.4.0",
+        "typescript": "^4.4.4"
     }
 }
