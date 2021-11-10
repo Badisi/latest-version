@@ -122,10 +122,10 @@ const TESTS: TestCase[] = [{
     expect: []
 }, {
     name: 'Collection of one package',
-    data: ['npm'],
+    data: ['typescript'],
     expect: [{
-        name: 'npm',
-        installed: undefined, latest: TO_BE_DEFINED, next: undefined, wanted: undefined, wantedTagOrRange: undefined,
+        name: 'typescript',
+        installed: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: undefined, wantedTagOrRange: undefined,
         updatesAvailable: { latest: false, next: false, wanted: false },
         error: undefined
     }]
