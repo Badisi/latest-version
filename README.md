@@ -15,12 +15,12 @@
 
 ## Features
 
-* Get latest versions of packages *(from package registries)*
-  * `latest`, `next` and `wanted` if a version range or a tag is provided
-* Get `installed` version of packages *(if installed locally or globally)*
-* Check if `updates` are available
-* Cache support to increase data retrieval performance
-* Support public/private repositories and proxies
+✅ Get `latest` and `next` versions of packages *(from package registries)*
+✅ Get `wanted` version of packages *(if a version range or a tag is provided)*
+✅ Get `installed` version of packages *(if installed locally or globally)*
+✅ Check if `updates` are available
+✅ Cache support to increase data retrieval performance
+✅ Support public/private repositories and proxies
 
 ## Installation
 
@@ -36,9 +36,14 @@ $ yarn add @badisi/latest-version
 
 __Example__
 
-```js
-const { readFileSync } = require('fs');
-const latestVersion = require('@badisi/latest-version');
+```ts
+/** CommonJS */
+// const { readFileSync } = require('fs');
+// const latestVersion = require('@badisi/latest-version');
+
+/** ESM / Typescript */
+import { readFileSync } from 'fs';
+import latestVersion from '@badisi/latest-version';
 
 (async () => {
     // Single package
