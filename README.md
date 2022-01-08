@@ -3,7 +3,7 @@
 📦 Get latest versions of packages.
 
 [![npm version](https://img.shields.io/npm/v/@badisi/latest-version.svg?color=blue&logo=npm)][npm]
-[![npm downloads](https://img.shields.io/npm/dw/@badisi/latest-version.svg?color=blue&logo=npm)][npm-dl]
+[![npm downloads](https://img.shields.io/npm/dw/@badisi/latest-version.svg?color=7986CB&logo=npm)][npm-dl]
 [![license](https://img.shields.io/npm/l/@badisi/latest-version.svg?color=ff69b4)][license]
 
 [![build status](https://github.com/badisi/latest-version/workflows/CI%20tests/badge.svg)][ci-tests]
