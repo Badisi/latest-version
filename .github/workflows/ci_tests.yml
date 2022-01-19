@@ -11,14 +11,18 @@ on:
 
 jobs:
   ci_tests_macos:
+    name: Tests on macos node${{ matrix.node }}
     runs-on: macos-latest
+    strategy:
+      matrix:
+        node: ['12', '14', '16']
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
       - name: Setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
-          node-version: 14.x
+          node-version: ${{ matrix.node }}
       - name: Make sure npm is installed globally
         run: npm install -g npm@latest
       - name: Install dependencies
@@ -29,14 +33,18 @@ jobs:
         run: npm run test
 
   ci_tests_linux:
+    name: Tests on linux node${{ matrix.node }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['12', '14', '16']
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
       - name: Setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
-          node-version: 14.x
+          node-version: ${{ matrix.node }}
       - name: Make sure npm is installed globally
         run: npm install -g npm@latest
       - name: Install dependencies
@@ -47,14 +55,18 @@ jobs:
         run: npm run test
 
   ci_tests_windows:
+    name: Tests on windows node${{ matrix.node }}
     runs-on: windows-latest
+    strategy:
+      matrix:
+        node: ['12', '14', '16']
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
       - name: Setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2
         with:
-          node-version: 14.x
+          node-version: ${{ matrix.node }}
       - name: Make sure npm is installed globally
         run: npm install -g npm@latest
       - name: Install dependencies
