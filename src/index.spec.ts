@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, rmSync } from 'fs';
+import { existsSync, readFileSync, removeSync } from 'fs-extra';
 import { join } from 'path';
 import rewire from 'rewire';
 
@@ -207,10 +207,10 @@ const testPkg = (actual: LatestVersionPackage, expected: LatestVersionPackage, t
 
 describe('@badisi/latest-version', () => {
     describe('Test cache', () => {
-        const cacheDir = rewire('./index')['__get__']('getCacheDir')();
+        const cacheDir: string = rewire('./index')['__get__']('getCacheDir')();
         describe('useCache=false', () => {
             beforeAll((done) => {
-                rmSync(cacheDir, { recursive: true, force: true });
+                removeSync(cacheDir);
                 spyOnRequire('npm/package.json').and.returnValue({ version: undefined });
                 void latestVersion(['npm', '@badisi/latest-version'], { useCache: false })
                     .then(() => {
@@ -225,7 +225,7 @@ describe('@badisi/latest-version', () => {
         describe('useCache=true', () => {
             let pkgsCached: LatestVersionPackage[];
             beforeEach((done) => {
-                rmSync(cacheDir, { recursive: true, force: true });
+                removeSync(cacheDir);
                 spyOnRequire('npm/package.json').and.returnValue({ version: undefined });
                 void latestVersion(['npm@^5.0.2', '@badisi/latest-version', '@scope/name'], { useCache: true })
                     .then((value: LatestVersionPackage[]) => {
@@ -287,7 +287,7 @@ describe('@badisi/latest-version', () => {
         });
         describe('cacheMaxAge=0', () => {
             beforeEach((done) => {
-                rmSync(cacheDir, { recursive: true, force: true });
+                removeSync(cacheDir);
                 spyOnRequire('npm/package.json').and.returnValue({ version: undefined });
                 void latestVersion(['npm@^5.0.2', '@badisi/latest-version'], { useCache: true })
                     .then(() => {
@@ -320,7 +320,7 @@ describe('@badisi/latest-version', () => {
                     .then(() => {
                         setTimeout(() => {
                             const { lastUpdateDate: after } = JSON.parse(readFileSync(join(cacheDir, '@badisi/latest-version.json')).toString());
-                            expect(before).toBeLessThan(after);
+                            expect(before as number).toBeLessThan(after as number);
                             done();
                         }, 1000); // give time for the cache to be persisted
                     });
@@ -334,9 +334,9 @@ describe('@badisi/latest-version', () => {
 
             beforeAll(async () => {
                 if (test.fakeInstalled) {
-                    spyOnRequire(`typescript/package.json`).and.returnValue({ version: test.fakeInstalled });
+                    spyOnRequire('typescript/package.json').and.returnValue({ version: test.fakeInstalled });
                 } else {
-                    spyOnRequire(`typescript/package.json`).and.returnValue({ version: undefined });
+                    spyOnRequire('typescript/package.json').and.returnValue({ version: undefined });
                 }
 
                 if (typeof test.data === 'string') {
@@ -371,7 +371,7 @@ describe('@badisi/latest-version', () => {
                 }
             } else if (isPackageJson(test.data)) {
                 const testData: Package[] = [];
-                [test.data.dependencies, test.data.devDependencies, test.data.peerDependencies].forEach((deps) => {
+                [test.data.dependencies, test.data.devDependencies, test.data.peerDependencies].forEach((deps: Record<string, unknown>) => {
                     testData.push(...Object.keys(deps).map((key: string) => `${key}@${deps[key]}`));
                 });
                 it('returned type', () => {
