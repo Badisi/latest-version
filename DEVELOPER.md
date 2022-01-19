@@ -12,8 +12,8 @@ Before you can build and test this library you must install and configure the fo
 You will then need to install the library required dependencies:
 
 ```sh
-$ cd <library-path>
-$ npm install
+cd <library-path>
+npm install
 ```
 
 ## Testing locally
@@ -34,7 +34,7 @@ You can test the library while developing it, as follow:
 2. Run the test file with *ts-node*
 
    ```sh
-   $ npx ts-node test.ts
+   npx ts-node test.ts
    ```
 
 ## Unit testing
@@ -42,7 +42,7 @@ You can test the library while developing it, as follow:
 Ensure that each unit of the library performs as expected.
 
 ```sh
-$ npm run test
+npm run test
 ```
 
 ## Linting/verifying source code
@@ -50,7 +50,7 @@ $ npm run test
 Check that the code is properly formatted and adheres to coding style.
 
 ```sh
-$ npm run lint
+npm run lint
 ```
 
 ## Building the library
@@ -58,7 +58,7 @@ $ npm run lint
 The library will be built in the `./dist` directory.
 
 ```sh
-$ npm run build
+npm run build
 ```
 
 ## Publishing to NPM repository

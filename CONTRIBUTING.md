@@ -79,7 +79,7 @@ Before you submit your Pull Request (PR) consider the following guidelines:
 4. Make your changes in a new git branch:
 
      ```sh
-     $ git checkout -b my-fix-branch master
+     git checkout -b my-fix-branch master
      ```
 
 5. Create your patch, **including appropriate test cases**.
@@ -92,14 +92,14 @@ Before you submit your Pull Request (PR) consider the following guidelines:
    Adherence to these conventions is necessary because release notes are automatically generated from these messages.
 
      ```sh
-     $ git commit --all
+     git commit --all
      ```
     Note: the optional commit `-a` command line option will automatically "add" and "rm" edited files.
 
 9. Push your branch to GitHub:
 
     ```sh
-    $ git push origin my-fix-branch
+    git push origin my-fix-branch
     ```
 
 10. In GitHub, send a pull request to `develop` branch.
@@ -121,8 +121,8 @@ If I ask for changes via code reviews then:
 3. Create a fixup commit and push to your GitHub repository (this will update your Pull Request):
 
     ```sh
-    $ git commit --all --fixup HEAD
-    $ git push
+    git commit --all --fixup HEAD
+    git push
     ```
 
 That's it! Thank you for your contribution!
@@ -136,19 +136,19 @@ In order to update the commit message of the last commit on your branch:
 1. Check out your branch:
 
     ```sh
-    $ git checkout my-fix-branch
+    git checkout my-fix-branch
     ```
 
 2. Amend the last commit and modify the commit message:
 
     ```sh
-    $ git commit --amend
+    git commit --amend
     ```
 
 3. Push to your GitHub repository:
 
     ```sh
-    $ git push --force-with-lease
+    git push --force-with-lease
     ```
 
 > NOTE:<br />
@@ -162,25 +162,25 @@ After your pull request is merged, you can safely delete your branch and pull th
 * Delete the remote branch on GitHub either through the GitHub web UI or your local shell as follows:
 
     ```sh
-    $ git push origin --delete my-fix-branch
+    git push origin --delete my-fix-branch
     ```
 
 * Check out the master branch:
 
     ```sh
-    $ git checkout master -f
+    git checkout master -f
     ```
 
 * Delete the local branch:
 
     ```sh
-    $ git branch -D my-fix-branch
+    git branch -D my-fix-branch
     ```
 
 * Update your master with the latest upstream version:
 
     ```sh
-    $ git pull --ff upstream master
+    git pull --ff upstream master
     ```
 
 

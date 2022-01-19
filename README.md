@@ -25,11 +25,11 @@
 ## Installation
 
 ```sh
-$ npm install @badisi/latest-version --save
+npm install @badisi/latest-version --save
 ```
 
 ```sh
-$ yarn add @badisi/latest-version
+yarn add @badisi/latest-version
 ```
 
 ## Usage
