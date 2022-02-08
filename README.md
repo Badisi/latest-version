@@ -11,16 +11,16 @@
 <!--[![dependencies status](https://img.shields.io/david/badisi/latest-version.svg)][deps]-->
 <!--[![devDependencies status](https://img.shields.io/david/dev/badisi/latest-version.svg)][dev-deps]-->
 
-<hr>
+<hr/>
 
 ## Features
 
-✅ Get `latest` and `next` versions of packages *(from package registries)*  
-✅ Get `wanted` version of packages *(if a version range or a tag is provided)*  
-✅ Get `installed` version of packages *(if installed locally or globally)*  
-✅ Check if `updates` are available  
-✅ Cache support to increase data retrieval performance  
-✅ Support public/private repositories and proxies  
+✅ Get `latest` and `next` versions of packages *(from package registries)*<br/>
+✅ Get `wanted` version of packages *(if a version range or a tag is provided)*<br/>
+✅ Get `installed` version of packages *(if installed locally or globally)*<br/>
+✅ Check if `updates` are available<br/>
+✅ Cache support to increase data retrieval performance<br/>
+✅ Support public/private repositories and proxies<br/>
 
 ## Installation
 
