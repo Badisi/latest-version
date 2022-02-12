@@ -299,7 +299,7 @@ The content of the commit message body should contain:
 
 
 
-[coc]: https://github.com/badisi/latest-version/blob/master/CODE_OF_CONDUCT.md
+[coc]: https://github.com/badisi/latest-version/blob/main/CODE_OF_CONDUCT.md
 [github]: https://github.com/badisi/latest-version
 [issue-templates]: https://github.com/badisi/latest-version/issues/new/choose
 [github-pr]: https://github.com/badisi/latest-version/pulls

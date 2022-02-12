@@ -26,7 +26,7 @@ about: Report a bug in the library
     Issues that don't have enough info and can't be reproduced will be closed.
 
     You can read more about issue submission guidelines here:
-    https://github.com/badisi/latest-version/blob/master/CONTRIBUTING.md#submit-issue
+    https://github.com/badisi/latest-version/blob/main/CONTRIBUTING.md#submit-issue
 -->
 
 **Sample**
