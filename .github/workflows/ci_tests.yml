@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
-      - name: Make sure npm is installed globally
+      - name: Make sure npm is latest
         run: npm install -g npm@latest
       - name: Install dependencies
         run: npm clean-install
@@ -45,7 +45,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
-      - name: Make sure npm is installed globally
+      - name: Make sure npm is latest
         run: npm install -g npm@latest
       - name: Install dependencies
         run: npm clean-install
@@ -67,7 +67,11 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
-      - name: Make sure npm is installed globally
+      - name: Fix npm prior to installing latest
+        # https://github.com/actions/setup-node/issues/411
+        # https://github.com/npm/cli/issues/4341
+        run: npm install -g npm@8.3.1
+      - name: Make sure npm is latest
         run: npm install -g npm@latest
       - name: Install dependencies
         run: npm clean-install
