@@ -10,11 +10,17 @@ module.exports = {
     ],
     "ignorePatterns": [".eslintrc.js"],
     "parser": "@typescript-eslint/parser",
+    "files": [
+        "**/*.js",
+        "**/*.mjs",
+        "**/*.ts"
+    ],
     "parserOptions": {
         "project": [
             "tsconfig.spec.json",
             "tsconfig.json"
         ],
+        "extraFileExtensions": [".mjs"],
         "sourceType": "module"
     },
     "plugins": [

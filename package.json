@@ -37,7 +37,7 @@
     "scripts": {
         "lint": "eslint ./src/**/*.ts --ignore-pattern *.spec.ts",
         "test": "ts-node ./node_modules/jasmine/bin/jasmine.js --config=jasmine.json",
-        "build": "node ./build.js",
+        "build": "node ./build.mjs",
         "all": "npm run lint && npm run test && npm run build"
     },
     "dependencies": {
