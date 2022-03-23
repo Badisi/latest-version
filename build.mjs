@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/naming-convention, no-underscore-dangle */
 
+import colors from '@colors/colors/safe.js';
 import { existsSync, mkdirSync, rmSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, resolve as pathResolve } from 'path';
 import { fileURLToPath } from 'url';
 import { exec } from 'child_process';
-import colors from 'colors/safe.js';
 import cpy from 'cpy';
 
 const { green, magenta } = colors;
