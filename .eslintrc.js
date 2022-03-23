@@ -1,4 +1,5 @@
 module.exports = {
+    "root": true,
     "env": {
         "browser": true,
         "node": true,
@@ -10,11 +11,6 @@ module.exports = {
     ],
     "ignorePatterns": [".eslintrc.js"],
     "parser": "@typescript-eslint/parser",
-    "files": [
-        "**/*.js",
-        "**/*.mjs",
-        "**/*.ts"
-    ],
     "parserOptions": {
         "project": [
             "tsconfig.spec.json",

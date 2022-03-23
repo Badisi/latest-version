@@ -21,7 +21,8 @@
         "pretty": true
     },
     "include": [
-        "src/**/*.ts"
+        "src/**/*.ts",
+        "build.mjs"
     ],
     "exclude": [
         "node_modules",

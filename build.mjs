@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/naming-convention, no-underscore-dangle */
+
 import { existsSync, mkdirSync, rmSync, readFileSync, writeFileSync } from 'fs';
 import { dirname, resolve as pathResolve } from 'path';
 import { fileURLToPath } from 'url';
@@ -40,7 +42,7 @@ const copyAssets = async () => {
     await cpy('package.json', DIST_PATH, { flat: true });
 };
 
-const customizePackageJson = async () => {
+const customizePackageJson = () => {
     const pkgJsonPath = pathResolve(DIST_PATH, 'package.json');
     const pkgJson = JSON.parse(readFileSync(pkgJsonPath, { encoding: 'utf8' }));
     delete pkgJson.scripts;
@@ -66,12 +68,12 @@ const build = async () => {
     await copyAssets();
 
     log('> Customizing package.json..');
-    await customizePackageJson();
+    customizePackageJson();
 
     log(`> ${green('Done!')}\n`);
 };
 
-(async () => {
+void (async () => {
     try {
         await build();
     } catch (err) {
