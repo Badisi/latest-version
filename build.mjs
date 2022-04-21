@@ -1,18 +1,36 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/naming-convention, no-underscore-dangle */
+/* eslint-disable @typescript-eslint/naming-convention, @typescript-eslint/no-unsafe-argument, no-underscore-dangle */
 
-import colors from '@colors/colors/safe.js';
-import { existsSync, mkdirSync, rmSync, readFileSync, writeFileSync } from 'fs';
-import { dirname, resolve as pathResolve } from 'path';
-import { fileURLToPath } from 'url';
+import chalk from 'chalk';
 import { exec } from 'child_process';
 import cpy from 'cpy';
+import { buildSync } from 'esbuild';
+import { mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { dirname, resolve as pathResolve } from 'path';
+import { fileURLToPath } from 'url';
 
-const { green, magenta } = colors;
+const { blue, green } = chalk;
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkgJson = JSON.parse(readFileSync(pathResolve(__dirname, 'package.json')));
 
-const DIST_PATH = pathResolve(__dirname, 'dist');
+const CONFIG = {
+    distPath: pathResolve(__dirname, 'dist'),
+    tsconfigPath: pathResolve(__dirname, 'tsconfig.json'),
+    entryPoints: [
+        { name: '', path: pathResolve(__dirname, 'src', 'index.ts') }
+    ],
+    buildOptions: {
+        esm: false,
+        cjs: true,
+        browser: false, // LatestVersion
+        externals: Object.keys({ ...pkgJson.dependencies, ...pkgJson.peerDependencies })
+    }
+};
 
-const log = str => console.log(magenta(str));
+const copyAssets = async () => {
+    await cpy('package.json', CONFIG.distPath, { flat: true });
+    await cpy('README.md', CONFIG.distPath, { flat: true });
+    await cpy('LICENSE', CONFIG.distPath, { flat: true });
+};
 
 const execCmd = (cmd, opts) => new Promise((resolve, reject) => {
     exec(cmd, opts, (err, stdout, stderr) => {
@@ -24,58 +42,116 @@ const execCmd = (cmd, opts) => new Promise((resolve, reject) => {
     });
 });
 
-const cleanDir = path => new Promise(resolve => {
-    const exists = existsSync(path);
-    if (exists) {
-        rmSync(path, { recursive: true, cwd: __dirname });
+const build = (entryPoint, platform, format, bundleExternals = false, minify = false) => {
+    const outdir = pathResolve(CONFIG.distPath, format, entryPoint.name);
+    const options = {
+        platform,
+        format: (platform === 'browser') ? 'iife' : format,
+        absWorkingDir: __dirname,
+        outfile: pathResolve(outdir, (minify) ? 'index.min.js' : 'index.js'),
+        entryPoints: [entryPoint.path],
+        tsconfig: CONFIG.tsconfigPath,
+        bundle: true,
+        sourcemap: true,
+        minify,
+        globalName: (bundleExternals) ? CONFIG.buildOptions.browser : undefined,
+        external: (bundleExternals) ? undefined : CONFIG.buildOptions.externals
+    };
+
+    mkdirSync(outdir, { recursive: true });
+    if (platform === 'neutral') {
+        options.mainFields = ['module', 'main'];
+        writeFileSync(pathResolve(outdir, 'package.json'), JSON.stringify({ type: 'module' }, null, 4), { encoding: 'utf8' });
+    } else if (platform === 'node') {
+        writeFileSync(pathResolve(outdir, 'package.json'), JSON.stringify({ type: 'commonjs' }, null, 4), { encoding: 'utf8' });
     }
-    // Gives time to rmSync to unlock the file on Windows
-    setTimeout(() => {
-        mkdirSync(path, { recursive: true, cwd: __dirname });
-        resolve();
-    }, exists ? 1000 : 0);
-});
 
-const copyAssets = async () => {
-    await cpy('README.md', DIST_PATH, { flat: true });
-    await cpy('LICENSE', DIST_PATH, { flat: true });
-    await cpy('package.json', DIST_PATH, { flat: true });
-};
-
-const customizePackageJson = () => {
-    const pkgJsonPath = pathResolve(DIST_PATH, 'package.json');
-    const pkgJson = JSON.parse(readFileSync(pkgJsonPath, { encoding: 'utf8' }));
-    delete pkgJson.scripts;
-    delete pkgJson.devDependencies;
-    writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 4), { encoding: 'utf8' });
-
-    const pkgJsonCjsPath = pathResolve(DIST_PATH, 'cjs', 'package.json');
-    writeFileSync(pkgJsonCjsPath, JSON.stringify({ type: 'commonjs' }, null, 4), { encoding: 'utf8' });
-
-    const pkgJsonEsmPath = pathResolve(DIST_PATH, 'esm', 'package.json');
-    writeFileSync(pkgJsonEsmPath, JSON.stringify({ type: 'module' }, null, 4), { encoding: 'utf8' });
-};
-
-const build = async () => {
-    log('> Cleaning..');
-    await cleanDir(DIST_PATH);
-
-    log('> Building library..');
-    await execCmd('tsc --project tsconfig-cjs.json', { cwd: __dirname });
-    await execCmd('tsc --project tsconfig-esm.json', { cwd: __dirname });
-
-    log('> Copying assets..');
-    await copyAssets();
-
-    log('> Customizing package.json..');
-    customizePackageJson();
-
-    log(`> ${green('Done!')}\n`);
+    buildSync(options);
 };
 
 void (async () => {
     try {
-        await build();
+        console.log(blue('Building Library\n'));
+
+        // Build entry points
+        CONFIG.entryPoints.forEach(entryPoint => {
+            const entryPointName = (entryPoint.name) ? `/${entryPoint.name}` : '';
+
+            console.log('-'.repeat(78));
+            console.log(`Building entry point '${pkgJson.name}${entryPointName}'`);
+            console.log('-'.repeat(78));
+
+            if (CONFIG.buildOptions.esm) {
+                console.log(`${green('✓')} Bundling to ESM`);
+                build(entryPoint, 'neutral', 'esm');
+            }
+            if (CONFIG.buildOptions.cjs) {
+                console.log(`${green('✓')} Bundling to CJS`);
+                build(entryPoint, 'node', 'cjs');
+            }
+            if (CONFIG.buildOptions.browser) {
+                console.log(`${green('✓')} Bundling to BROWSER (self contained)`);
+                build(entryPoint, 'browser', 'browser', true);
+
+                console.log(`${green('✓')} Bundling to BROWSER and minifying (self contained)`);
+                build(entryPoint, 'browser', 'browser', true, true);
+            }
+
+            console.log(`${green('✓')} Built ${pkgJson.name}${entryPointName}`, '\n');
+        });
+
+        // Build library
+        console.log('-'.repeat(78));
+        console.log(`Building '${pkgJson.name}'`);
+        console.log('-'.repeat(78));
+
+        //  -- types
+        console.log(`${green('✓')} Generating types`);
+        await execCmd(`tsc --project ${CONFIG.tsconfigPath}`);
+        CONFIG.entryPoints.forEach(entryPoint => {
+            const entryPointName = (entryPoint.name) ? `/${entryPoint.name}` : '';
+            const content = {
+                name: `${pkgJson.name}${entryPointName}`,
+                types: './index.d.ts'
+            };
+            if (CONFIG.buildOptions.esm) {
+                content.import = `../esm${entryPointName}/index.js`;
+            }
+            if (CONFIG.buildOptions.cjs) {
+                content.require = `../cjs${entryPointName}/index.js`;
+            }
+            if (CONFIG.buildOptions.browser) {
+                content.browser = `../browser${entryPointName}/index.min.js`;
+            }
+            writeFileSync(
+                pathResolve(CONFIG.distPath, entryPoint.name, 'package.json'),
+                JSON.stringify(content, null, 4),
+                { encoding: 'utf8' }
+            );
+        });
+
+        //  -- assets
+        console.log(`${green('✓')} Copying assets`);
+        await copyAssets();
+
+        //  -- package.json
+        console.log(`${green('✓')} Writing package metadata`);
+        const distPkgJsonPath = pathResolve(CONFIG.distPath, 'package.json');
+        const distPkgJson = JSON.parse(readFileSync(distPkgJsonPath, { encoding: 'utf8' }));
+        delete distPkgJson.scripts;
+        delete distPkgJson.devDependencies;
+        writeFileSync(distPkgJsonPath, JSON.stringify(distPkgJson, null, 4), { encoding: 'utf8' });
+
+        //  -- end
+        console.log(`${green('✓')} Built ${pkgJson.name}\n`);
+
+        // Success
+        console.log(green('-'.repeat(78)));
+        console.log(green('Built Library'));
+        console.log(green(`- from: ${__dirname}`));
+        console.log(green(`- to:   ${CONFIG.distPath}`));
+        console.log(green('-'.repeat(78)));
+
     } catch (err) {
         console.error(err);
         process.exit(1);

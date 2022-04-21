@@ -105,13 +105,6 @@ interface LatestVersionOptions {
     readonly requestOptions?: RequestOptions;
 }
 
-interface PackageMetadata {
-    name: string;
-    lastUpdateDate: number;
-    versions: string[];
-    distTags: Record<string, string>;
-}
-
 type LatestVersion = {
     /**
      * Get latest versions of packages from of a package json like object.
@@ -162,6 +155,16 @@ type PackageJson = Record<string, any> & ({
 } | {
     peerDependencies: PackageJsonDependencies;
 });
+
+/**
+ * @internal
+ */
+interface PackageMetadata {
+    name: string;
+    lastUpdateDate: number;
+    versions: string[];
+    distTags: Record<string, string>;
+}
 
 const ONE_DAY = 1000 * 60 * 60 * 24; // eslint-disable-line @typescript-eslint/naming-convention
 
@@ -337,7 +340,7 @@ const latestVersion: LatestVersion = async (arg: Package | Package[] | PackageJs
     return (typeof arg === 'string') ? results[0] : results;
 };
 
-export {
+export type {
     LatestVersion,
     Package,
     PackageRange,
@@ -349,4 +352,3 @@ export {
     LatestVersionOptions
 };
 export default latestVersion;
-module.exports = latestVersion;

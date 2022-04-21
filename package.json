@@ -8,12 +8,11 @@
         "name": "Badisi"
     },
     "main": "cjs/index.js",
-    "module": "esm/index.js",
-    "types": "esm/index.d.ts",
+    "types": "index.d.ts",
     "exports": {
         ".": {
-            "require": "./cjs/index.js",
-            "import": "./esm/index.js"
+            "types": "./index.d.ts",
+            "require": "./cjs/index.js"
         }
     },
     "repository": {

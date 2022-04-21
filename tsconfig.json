@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
-        "outDir": "./dist",
-        "target": "es2019",
+        "outDir": "dist",
+        "target": "es2015",
         "lib": [
-            "es2018"
+            "es2017"
         ],
         "module": "commonjs",
         "moduleResolution": "node",
@@ -11,18 +11,23 @@
             "node",
             "jasmine"
         ],
+        "declaration": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "emitDeclarationOnly": true,
         "resolveJsonModule": true,
         "esModuleInterop": true,
         "importHelpers": true,
+        "pretty": true,
+        "strict": true,
         "strictPropertyInitialization": true,
         "noUnusedLocals": true,
-        "declaration": true,
-        "strict": true,
-        "pretty": true
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true
     },
     "include": [
-        "src/**/*.ts",
-        "build.mjs"
+        "build.mjs",
+        "src/**/*.ts"
     ],
     "exclude": [
         "node_modules",
