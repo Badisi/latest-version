@@ -6,10 +6,8 @@
 [![npm downloads](https://img.shields.io/npm/dw/@badisi/latest-version.svg?color=7986CB&logo=npm)][npm-dl]
 [![license](https://img.shields.io/npm/l/@badisi/latest-version.svg?color=ff69b4)][license]
 
-[![build status](https://github.com/badisi/latest-version/workflows/CI%20tests/badge.svg)][ci-tests]
+[![build status](https://github.com/Badisi/latest-version/actions/workflows/ci_tests.yml/badge.svg)][ci-tests]
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)][pullrequest]
-<!--[![dependencies status](https://img.shields.io/david/badisi/latest-version.svg)][deps]-->
-<!--[![devDependencies status](https://img.shields.io/david/dev/badisi/latest-version.svg)][dev-deps]-->
 
 <hr/>
 
@@ -179,7 +177,7 @@ Please read and follow the [Code of Conduct][codeofconduct] and help me keep thi
 
 [npm]: https://www.npmjs.com/package/@badisi/latest-version
 [npm-dl]: https://npmcharts.com/compare/@badisi/latest-version?minimal=true
-[ci-tests]: https://github.com/badisi/latest-version/actions?query=workflow:CI%20tests
+[ci-tests]: https://github.com/Badisi/latest-version/actions/workflows/ci_tests.yml
 [deps]: https://david-dm.org/badisi/latest-version
 [dev-deps]: https://david-dm.org/badisi/latest-version?type=dev
 [pullrequest]: https://github.com/badisi/latest-version/blob/main/CONTRIBUTING.md#-submitting-a-pull-request-pr
