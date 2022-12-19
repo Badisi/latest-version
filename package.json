@@ -39,6 +39,9 @@
         "test": "ts-node ./node_modules/jasmine/bin/jasmine.js --config=jasmine.json",
         "build": "node ./build.mjs"
     },
+    "engines": {
+        "node": ">= 15"
+    },
     "dependencies": {
         "global-dirs": "^3.0.1",
         "registry-auth-token": "^5.0.1",
@@ -66,8 +69,5 @@
         "rewire": "^6.0.0",
         "ts-node": "^10.9.1",
         "typescript": "^4.9.3"
-    },
-    "engines": {
-        "node": ">= 14"
     }
 }
