@@ -221,11 +221,8 @@ const testValue = (actual: any, expected: any, output: string) => {
 };
 
 const testPkg = (
-    actual: LatestVersionPackage,
-    expected: LatestVersionPackage,
-    testLocalInstalled = false,
-    testGlobalNpmInstalled = false,
-    testGlobalYarnInstalled = false
+    actual: LatestVersionPackage, expected: LatestVersionPackage,
+    testLocalInstalled = false, testGlobalNpmInstalled = false, testGlobalYarnInstalled = false
 ) => {
     testValue(actual.name, expected.name, '(pkg.name)');
     if (testLocalInstalled) {
