@@ -204,7 +204,6 @@ const TESTS: TestCase[] = [{
     }]
 }];
 
-
 const isPackageJson = (obj: any): obj is PackageJson => {
     return ((obj as PackageJson).dependencies !== undefined) ||
         ((obj as PackageJson).devDependencies !== undefined) ||
