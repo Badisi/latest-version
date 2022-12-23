@@ -37,7 +37,7 @@ const TESTS: TestCase[] = [{
     data: '',
     expect: {
         name: '',
-        local: undefined, globalNpm: undefined, globalYarn: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: undefined,
+        local: undefined, globalNpm: undefined, globalYarn: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: 'latest',
         updatesAvailable: false,
         error: undefined
     }
@@ -46,7 +46,7 @@ const TESTS: TestCase[] = [{
     data: 'typescript',
     expect: {
         name: 'typescript',
-        local: undefined, globalNpm: undefined, globalYarn: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: undefined, wantedTagOrRange: undefined,
+        local: undefined, globalNpm: undefined, globalYarn: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: TO_BE_DEFINED, wantedTagOrRange: 'latest',
         updatesAvailable: false,
         error: undefined
     }
@@ -101,8 +101,8 @@ const TESTS: TestCase[] = [{
     data: ['typescript', 'typescript@3.6.2', 'typescript@^3.6.2', 'typescript@~3.6.2'],
     expect: [{
         name: 'typescript',
-        local: '3.6.2', globalNpm: undefined, globalYarn: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: undefined, wantedTagOrRange: undefined,
-        updatesAvailable: false,
+        local: '3.6.2', globalNpm: undefined, globalYarn: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: TO_BE_DEFINED, wantedTagOrRange: 'latest',
+        updatesAvailable: { local: TO_BE_DEFINED, globalNpm: false, globalYarn: false },
         error: undefined
     }, {
         name: 'typescript',
@@ -128,8 +128,8 @@ const TESTS: TestCase[] = [{
     data: ['typescript', 'typescript@3.6.2', 'typescript@^3.6.2', 'typescript@~3.6.2'],
     expect: [{
         name: 'typescript',
-        local: '3.6.2', globalNpm: '2.5.0', globalYarn: '4.1.0', latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: undefined, wantedTagOrRange: undefined,
-        updatesAvailable: false,
+        local: '3.6.2', globalNpm: '2.5.0', globalYarn: '4.1.0', latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: TO_BE_DEFINED, wantedTagOrRange: 'latest',
+        updatesAvailable: { local: TO_BE_DEFINED, globalNpm: TO_BE_DEFINED, globalYarn: TO_BE_DEFINED },
         error: undefined
     }, {
         name: 'typescript',
@@ -156,7 +156,7 @@ const TESTS: TestCase[] = [{
     data: ['typescript'],
     expect: [{
         name: 'typescript',
-        local: undefined, globalNpm: undefined, globalYarn: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: undefined, wantedTagOrRange: undefined,
+        local: undefined, globalNpm: undefined, globalYarn: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: TO_BE_DEFINED, wantedTagOrRange: 'latest',
         updatesAvailable: false,
         error: undefined
     }]
@@ -165,7 +165,7 @@ const TESTS: TestCase[] = [{
     data: ['typescript', 'typescript@1.6.2', '@scope/name@^5.0.2'],
     expect: [{
         name: 'typescript',
-        local: undefined, globalNpm: undefined, globalYarn: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: undefined, wantedTagOrRange: undefined,
+        local: undefined, globalNpm: undefined, globalYarn: undefined, latest: TO_BE_DEFINED, next: TO_BE_DEFINED, wanted: TO_BE_DEFINED, wantedTagOrRange: 'latest',
         updatesAvailable: false,
         error: undefined
     }, {
@@ -242,7 +242,15 @@ const testPkg = (
     testValue(actual.next, expected.next, '(pkg.next)');
     testValue(actual.wanted, expected.wanted, '(pkg.wanted)');
     testValue(actual.wantedTagOrRange, expected.wantedTagOrRange, '(pkg.wantedTagOrRange)');
-    testValue(actual.updatesAvailable, expected.updatesAvailable, '(pkg.updatesAvailable)');
+    if (typeof actual.updatesAvailable === 'boolean') {
+        testValue(actual.updatesAvailable, expected.updatesAvailable, '(pkg.updatesAvailable)');
+    } else {
+        Object.keys(actual.updatesAvailable).forEach(key => {
+            // eslint-disable-next-line
+            // @ts-ignore
+            testValue(actual.updatesAvailable[key], expected.updatesAvailable[key], `(pkg.updatesAvailable.${key})`);
+        });
+    }
     testValue(actual.error, expected.error, '(pkg.error)');
 };
 
@@ -283,13 +291,13 @@ describe('@badisi/latest-version', () => {
                 });
                 testPkg(pkgsCached[1], {
                     name: '@badisi/latest-version',
-                    local: undefined, globalNpm: undefined, globalYarn: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: undefined,
+                    local: undefined, globalNpm: undefined, globalYarn: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: 'latest',
                     updatesAvailable: false,
                     error: undefined
                 });
                 testPkg(pkgsCached[2], {
                     name: '@scope/name',
-                    local: undefined, globalNpm: undefined, globalYarn: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: undefined,
+                    local: undefined, globalNpm: undefined, globalYarn: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: 'latest',
                     updatesAvailable: false,
                     error: TO_BE_DEFINED as unknown as Error
                 });
@@ -311,13 +319,13 @@ describe('@badisi/latest-version', () => {
                             });
                             testPkg(value[1], {
                                 name: '@badisi/latest-version',
-                                local: undefined, globalNpm: undefined, globalYarn: undefined, latest: TO_BE_DEFINED, next: undefined, wanted: undefined, wantedTagOrRange: undefined,
+                                local: undefined, globalNpm: undefined, globalYarn: undefined, latest: TO_BE_DEFINED, next: undefined, wanted: TO_BE_DEFINED, wantedTagOrRange: 'latest',
                                 updatesAvailable: false,
                                 error: undefined
                             });
                             testPkg(value[2], {
                                 name: '@scope/name',
-                                local: undefined, globalNpm: undefined, globalYarn: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: undefined,
+                                local: undefined, globalNpm: undefined, globalYarn: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: 'latest',
                                 updatesAvailable: false,
                                 error: TO_BE_DEFINED as unknown as Error
                             });
@@ -347,7 +355,7 @@ describe('@badisi/latest-version', () => {
                             });
                             testPkg(value[1], {
                                 name: '@badisi/latest-version',
-                                local: undefined, globalNpm: undefined, globalYarn: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: undefined,
+                                local: undefined, globalNpm: undefined, globalYarn: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: 'latest',
                                 updatesAvailable: false,
                                 error: undefined
                             });

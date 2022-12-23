@@ -312,7 +312,7 @@ const getInfo = async (pkg: Package, options?: LatestVersionOptions): Promise<La
     const i = pkg.lastIndexOf('@');
     let pkgInfo: LatestVersionPackage = {
         name: (i > 1) ? pkg.slice(0, i) : pkg,
-        wantedTagOrRange: (i > 1) ? pkg.slice(i + 1) : undefined,
+        wantedTagOrRange: (i > 1) ? pkg.slice(i + 1) : 'latest',
         updatesAvailable: false
     };
 
