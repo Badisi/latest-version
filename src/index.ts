@@ -3,13 +3,13 @@ import registryAuthToken from 'registry-auth-token';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { RequestOptions as HttpRequestOptions, Agent, IncomingMessage } from 'http';
 import { RequestOptions as HttpsRequestOptions } from 'https';
+import { join, dirname, resolve as pathResolve } from 'path';
 import { gt, maxSatisfying } from 'semver';
 import { npm, yarn } from 'global-dirs';
-import { join, dirname } from 'path';
 import { homedir } from 'os';
 import { URL } from 'url';
 
-interface LatestVersions {
+interface RegistryVersions {
     /**
      * The latest version of the package found on the provided registry (if found).
      */
@@ -24,27 +24,39 @@ interface LatestVersions {
     wanted?: string;
 }
 
-interface LatestVersionPackage extends LatestVersions {
+interface InstalledVersions {
+    /**
+     * The current local installed version of the package (if installed).
+     */
+    local?: string;
+    /**
+     * The current npm global installed version of the package (if installed).
+     */
+    globalNpm?: string;
+    /**
+     * The current yarn global installed version of the package (if installed).
+     */
+    globalYarn?: string;
+}
+
+interface LatestVersionPackage extends InstalledVersions, RegistryVersions {
     /**
      * The name of the package.
      */
     name: string;
     /**
-     * The current local or global installed version of the package (if installed).
-     */
-    installed?: string;
-    /**
      * The tag or version range that was provided (if provided).
      */
     wantedTagOrRange?: string;
     /**
-     * Whether the installed version (if any) could be upgraded or not.
+     * Whether the local or global installed version (if any) could be upgraded or not.
+     * The latest version of the package found on the provided registry and satisfied by the provided tag or version range (if provided).
      */
     updatesAvailable: {
-        latest: boolean;
-        next: boolean;
-        wanted: boolean;
-    };
+        local: string | false;
+        globalNpm: string | false;
+        globalYarn: string | false;
+    } | false;
     /**
      * Any error that might have occurred during the process.
      */
@@ -259,7 +271,7 @@ const getMetadataFromCache = (pkgName: string, options?: LatestVersionOptions): 
     return undefined;
 };
 
-const getLatestVersions = async (pkgName: string, tagOrRange?: string, options?: LatestVersionOptions): Promise<LatestVersions | void> => {
+const getRegistryVersions = async (pkgName: string, tagOrRange?: string, options?: LatestVersionOptions): Promise<RegistryVersions | void> => {
     let pkgMetadata: PackageMetadata | undefined;
     if (pkgName.length && options?.useCache) {
         pkgMetadata = getMetadataFromCache(pkgName, options);
@@ -270,7 +282,7 @@ const getLatestVersions = async (pkgName: string, tagOrRange?: string, options?:
         pkgMetadata = await downloadMetadata(pkgName, options);
     }
 
-    const versions: LatestVersions = {
+    const versions: RegistryVersions = {
         latest: pkgMetadata?.distTags?.latest,
         next: pkgMetadata?.distTags?.next
     };
@@ -282,10 +294,15 @@ const getLatestVersions = async (pkgName: string, tagOrRange?: string, options?:
     return versions;
 };
 
-const getInstalledVersion = (pkgName: string): string | undefined => {
+const getInstalledVersion = (pkgName: string, location: keyof InstalledVersions = 'local'): string | undefined => {
     try {
-        const paths = ['.', npm.packages, yarn.packages];
-        return require(require.resolve(join(pkgName, 'package.json'), { paths }))?.version as string | undefined;
+        let pkgPath = './node_modules';
+        switch(location) {
+            case 'globalNpm': pkgPath = npm.packages; break;
+            case 'globalYarn': pkgPath = yarn.packages; break;
+            default: break;
+        }
+        return require(pathResolve(pkgPath, pkgName, 'package.json'))?.version as string | undefined;
     } catch {
         return undefined;
     }
@@ -296,20 +313,21 @@ const getInfo = async (pkg: Package, options?: LatestVersionOptions): Promise<La
     let pkgInfo: LatestVersionPackage = {
         name: (i > 1) ? pkg.slice(0, i) : pkg,
         wantedTagOrRange: (i > 1) ? pkg.slice(i + 1) : undefined,
-        updatesAvailable: { latest: false, next: false, wanted: false }
+        updatesAvailable: false
     };
 
     try {
         pkgInfo = {
             ...pkgInfo,
-            installed: getInstalledVersion(pkgInfo.name),
-            ...(await getLatestVersions(pkgInfo.name, pkgInfo.wantedTagOrRange, options))
+            local: getInstalledVersion(pkgInfo.name, 'local'),
+            globalNpm: getInstalledVersion(pkgInfo.name, 'globalNpm'),
+            globalYarn: getInstalledVersion(pkgInfo.name, 'globalYarn'),
+            ...(await getRegistryVersions(pkgInfo.name, pkgInfo.wantedTagOrRange, options))
         };
-        pkgInfo.updatesAvailable = {
-            latest: (pkgInfo.installed && pkgInfo.latest) ? gt(pkgInfo.latest, pkgInfo.installed) : false,
-            next: (pkgInfo.installed && pkgInfo.next) ? gt(pkgInfo.next, pkgInfo.installed) : false,
-            wanted: (pkgInfo.installed && pkgInfo.wanted) ? gt(pkgInfo.wanted, pkgInfo.installed) : false
-        };
+        const local = (pkgInfo.local && pkgInfo.wanted) ? (gt(pkgInfo.wanted, pkgInfo.local) ? pkgInfo.wanted : false) : false;
+        const globalNpm = (pkgInfo.globalNpm && pkgInfo.wanted) ? (gt(pkgInfo.wanted, pkgInfo.globalNpm) ? pkgInfo.wanted : false) : false;
+        const globalYarn = (pkgInfo.globalYarn && pkgInfo.wanted) ? (gt(pkgInfo.wanted, pkgInfo.globalYarn) ? pkgInfo.wanted : false) : false;
+        pkgInfo.updatesAvailable = (local || globalNpm || globalYarn) ? { local, globalNpm, globalYarn } : false;
     } catch (err: any) {
         pkgInfo.error = err?.message || err;
     }
@@ -346,7 +364,7 @@ export type {
     PackageRange,
     PackageJson,
     PackageJsonDependencies,
-    LatestVersions,
+    RegistryVersions,
     LatestVersionPackage,
     RequestOptions,
     LatestVersionOptions
