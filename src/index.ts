@@ -1,25 +1,27 @@
-import getRegistryUrl from 'registry-auth-token/registry-url';
-import registryAuthToken from 'registry-auth-token';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { RequestOptions as HttpRequestOptions, Agent, IncomingMessage } from 'http';
-import { RequestOptions as HttpsRequestOptions } from 'https';
-import { join, dirname, resolve as pathResolve } from 'path';
-import { gt, maxSatisfying } from 'semver';
+import type { RequestOptions as HttpRequestOptions, Agent, IncomingMessage } from 'http';
+import type { RequestOptions as HttpsRequestOptions } from 'https';
+import { join, dirname, resolve as pathResolve, parse } from 'path';
 import { npm, yarn } from 'global-dirs';
 import { homedir } from 'os';
 import { URL } from 'url';
 
+import getRegistryUrl from 'registry-auth-token/registry-url';
+import registryAuthToken from 'registry-auth-token';
+import maxSatisfying from 'semver/ranges/max-satisfying';
+import gt from 'semver/functions/gt';
+
 interface RegistryVersions {
     /**
-     * The latest version of the package found on the provided registry (if found).
+     * The latest version of the package found on the registry (if found).
      */
     latest?: string;
     /**
-     * The next version of the package found on the provided registry (if found).
+     * The next version of the package found on the registry (if found).
      */
     next?: string;
     /**
-     * The latest version of the package found on the provided registry and satisfied by the provided tag or version range (if provided).
+     * The latest version of the package found on the provided registry and satisfied by the wanted tag or version range.
      */
     wanted?: string;
 }
@@ -46,11 +48,12 @@ interface LatestVersionPackage extends InstalledVersions, RegistryVersions {
     name: string;
     /**
      * The tag or version range that was provided (if provided).
+     *
+     * @default "latest"
      */
     wantedTagOrRange?: string;
     /**
-     * Whether the local or global installed version (if any) could be upgraded or not.
-     * The latest version of the package found on the provided registry and satisfied by the provided tag or version range (if provided).
+     * Whether the local or global installed versions (if any) could be upgraded or not, based on the wanted version.
      */
     updatesAvailable: {
         local: string | false;
@@ -296,13 +299,43 @@ const getRegistryVersions = async (pkgName: string, tagOrRange?: string, options
 
 const getInstalledVersion = (pkgName: string, location: keyof InstalledVersions = 'local'): string | undefined => {
     try {
-        let pkgPath = './node_modules';
-        switch(location) {
-            case 'globalNpm': pkgPath = npm.packages; break;
-            case 'globalYarn': pkgPath = yarn.packages; break;
-            default: break;
+        if (location === 'globalNpm') {
+            return require(join(npm.packages, pkgName, 'package.json'))?.version as string;
+        } else if (location === 'globalYarn') {
+            // Make sure package is globally installed by Yarn
+            const yarnGlobalPkg = require(pathResolve(yarn.packages, '..', 'package.json'));
+            if (!yarnGlobalPkg?.dependencies?.[pkgName]) {
+                return undefined;
+            }
+            return require(join(yarn.packages, pkgName, 'package.json'))?.version as string;
+        } else {
+            let pkgPath = '';
+            try {
+                pkgPath = require.resolve(join(pkgName, 'package.json'));
+            } catch {
+                /**
+                 * require.resolve() may fail with the following error: ERR_PACKAGE_PATH_NOT_EXPORTED
+                 * In such a case, local package.json will be retrieved manually
+                 *
+                 * @see https://github.com/nodejs/node/issues/33460
+                 * @see https://github.com/nodejs/loaders/issues/26
+                 */
+                const allPaths = require.resolve.paths('/');
+                const { root } = parse(process.cwd());
+                const rootIndex = allPaths?.indexOf(join(root, 'node_modules'));
+                if (rootIndex && (rootIndex > -1)) {
+                    const localPaths = allPaths?.splice(0, rootIndex + 1) ?? [];
+                    // eslint-disable-next-line @typescript-eslint/prefer-for-of
+                    for (let i = 0; i < localPaths.length; i++) {
+                        pkgPath = join(localPaths[i], pkgName, 'package.json');
+                        if (existsSync(pkgPath)) {
+                            break;
+                        }
+                    }
+                }
+            }
+            return require(pkgPath)?.version as string;
         }
-        return require(pathResolve(pkgPath, pkgName, 'package.json'))?.version as string | undefined;
     } catch {
         return undefined;
     }
