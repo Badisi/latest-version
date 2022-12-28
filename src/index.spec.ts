@@ -380,6 +380,7 @@ describe('@badisi/latest-version', () => {
             beforeAll(async () => {
                 spyOnRequire(resolve(__dirname, '../node_modules/typescript/package.json')).and.returnValue({ version: test.fakeLocal });
                 spyOnRequire(resolve(npm.packages, 'typescript/package.json')).and.returnValue({ version: test.fakeGlobalNpm });
+                spyOnRequire(resolve(yarn.packages, '../package.json')).and.returnValue({ dependencies: { typescript: 'x.x.x' } });
                 spyOnRequire(resolve(yarn.packages, 'typescript/package.json')).and.returnValue({ version: test.fakeGlobalYarn });
 
                 if (typeof test.data === 'string') {
