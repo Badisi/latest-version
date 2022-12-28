@@ -31,12 +31,13 @@
 
 ## Features
 
+✅ Get `installed` versions of packages *(if installed locally or globally with npm or yarn)*<br/>
 ✅ Get `latest` and `next` versions of packages *(from package registries)*<br/>
 ✅ Get `wanted` version of packages *(if a version range or a tag is provided)*<br/>
-✅ Get `installed` version of packages *(if installed locally or globally)*<br/>
-✅ Check if `updates` are available<br/>
+✅ Check if any `updates` are available<br/>
 ✅ Cache support to increase data retrieval performance<br/>
-✅ Support public/private repositories and proxies<br/>
+✅ Support public/private repositories and proxies<br/><br/>
+✅ Visually check package updates thanks to a small `CLI` utility<br/>
 
 ## Installation
 
@@ -48,7 +49,7 @@ npm install @badisi/latest-version --save
 yarn add @badisi/latest-version
 ```
 
-## Usage
+## API
 
 __Example__
 
@@ -87,33 +88,42 @@ interface LatestVersionPackage {
      */
     name: string;
     /**
-     * The current local or global installed version of the package (if installed).
+     * The current local installed version of the package (if installed).
      */
-    installed?: string;
+    local?: string;
     /**
-     * The latest version of the package found on the provided registry (if found).
+     * The current npm global installed version of the package (if installed).
+     */
+    globalNpm?: string;
+    /**
+     * The current yarn global installed version of the package (if installed).
+     */
+    globalYarn?: string;
+    /**
+     * The latest version of the package found on the registry (if found).
      */
     latest?: string;
     /**
-     * The next version of the package found on the provided registry (if found).
+     * The next version of the package found on the registry (if found).
      */
     next?: string;
     /**
-     * The latest version of the package found on the provided registry and satisfied by the provided tag or version range (if provided).
-     */
-    wanted?: string;
-    /**
      * The tag or version range that was provided (if provided).
+     * @default "latest"
      */
     wantedTagOrRange?: string;
     /**
-     * Whether the installed version (if any) could be upgraded or not.
+     * The latest version of the package found on the provided registry and satisfied by the wanted tag or version range.
+     */
+    wanted?: string;
+    /**
+     * Whether the local or global installed versions (if any) could be upgraded or not, based on the wanted version.
      */
     updatesAvailable: {
-        latest: boolean;
-        next: boolean;
-        wanted: boolean;
-    };
+        local: string | false;
+        globalNpm: string | false;
+        globalYarn: string | false;
+    } | false;
     /**
      * Any error that might have occurred during the process.
      */
@@ -173,6 +183,23 @@ interface LatestVersionOptions {
 ```
 
 
+## Usage
+
+The CLI utility will help you visualize if any updates are available for a given **package.json** file, a local **package.json** file or any provided packages name.
+
+```sh
+$ latest-version <packageJson|packageName...>
+
+  Examples:
+    $ lv
+    $ latest-version path/to/package.json
+    $ latest-version package1 package2 package3
+```
+
+![CLI utility preview][clipreview]
+
+
+
 ## Development
 
 See the [developer docs][developer].
@@ -193,6 +220,7 @@ Please read and follow the [Code of Conduct][codeofconduct] and help me keep thi
 
 
 
+[clipreview]: https://github.com/badisi/latest-version/blob/main/cli_preview.png
 [developer]: https://github.com/badisi/latest-version/blob/main/DEVELOPER.md
 [contributing]: https://github.com/badisi/latest-version/blob/main/CONTRIBUTING.md
 [codeofconduct]: https://github.com/badisi/latest-version/blob/main/CODE_OF_CONDUCT.md
