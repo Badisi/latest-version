@@ -12,8 +12,8 @@
             "jasmine"
         ],
         "declaration": true,
-        "declarationMap": true,
-        "sourceMap": true,
+        "declarationMap": false,
+        "sourceMap": false,
         "emitDeclarationOnly": true,
         "resolveJsonModule": true,
         "esModuleInterop": true,

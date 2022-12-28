@@ -7,13 +7,19 @@
     "author": {
         "name": "Badisi"
     },
-    "main": "cjs/index.js",
+    "type": "commonjs",
+    "main": "index.js",
     "types": "index.d.ts",
     "exports": {
         ".": {
             "types": "./index.d.ts",
-            "require": "./cjs/index.js"
-        }
+            "require": "./index.js"
+        },
+        "./package.json": "./package.json"
+    },
+    "bin": {
+        "latest-version": "./bin/latest-version",
+        "lv": "./bin/latest-version"
     },
     "repository": {
         "type": "git",
@@ -35,6 +41,7 @@
     ],
     "scripts": {
         "ncu": "npx ncu -i --format=group --packageFile '{,projects/**/}package.json'",
+        "start": "ts-node --project=./tsconfig.json ./src/cli",
         "lint": "eslint ./src/**/*.ts --ignore-pattern *.spec.ts",
         "test": "ts-node ./node_modules/jasmine/bin/jasmine.js --config=jasmine.json",
         "build": "node ./build.mjs"
@@ -44,11 +51,12 @@
     },
     "dependencies": {
         "global-dirs": "^3.0.1",
+        "@colors/colors": "^1.5.0",
         "registry-auth-token": "^5.0.1",
-        "semver": "^7.3.8"
+        "semver": "^7.3.8",
+        "ora": "5.4.1"
     },
     "devDependencies": {
-        "@colors/colors": "^1.5.0",
         "@types/fs-extra": "^9.0.13",
         "@types/jasmine": "^4.3.1",
         "@types/node": "^18.11.11",
