@@ -36,8 +36,8 @@
 ✅ Get `wanted` version of packages *(if a version range or a tag is provided)*<br/>
 ✅ Check if any `updates` are available<br/>
 ✅ Cache support to increase data retrieval performance<br/>
-✅ Support public/private repositories and proxies<br/><br/>
-✅ Visually check package updates thanks to a small `CLI` utility<br/>
+✅ Support public/private repositories and proxies<br/>
+✅ [Command line tool](#tool) that helps visualize packages updates<br/>
 
 ## Installation
 
@@ -49,7 +49,7 @@ npm install @badisi/latest-version --save
 yarn add @badisi/latest-version
 ```
 
-## API
+## Usage
 
 __Example__
 
@@ -109,11 +109,12 @@ interface LatestVersionPackage {
     next?: string;
     /**
      * The tag or version range that was provided (if provided).
+     *
      * @default "latest"
      */
     wantedTagOrRange?: string;
     /**
-     * The latest version of the package found on the provided registry and satisfied by the wanted tag or version range.
+     * The latest version of the package found on the registry and satisfied by the wanted tag or version range.
      */
     wanted?: string;
     /**
@@ -183,9 +184,9 @@ interface LatestVersionOptions {
 ```
 
 
-## Usage
+## Command line tool
 
-The CLI utility will help you visualize if any updates are available for a given **package.json** file, a local **package.json** file or any provided packages name.
+The CLI utility will help you visualize any available updates for a given *package.json* file, a local *package.json* file or any provided package names.
 
 ```sh
 $ latest-version <packageJson|packageName...>

@@ -21,7 +21,7 @@ interface RegistryVersions {
      */
     next?: string;
     /**
-     * The latest version of the package found on the provided registry and satisfied by the wanted tag or version range.
+     * The latest version of the package found on the registry and satisfied by the wanted tag or version range.
      */
     wanted?: string;
 }
