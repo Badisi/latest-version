@@ -70,7 +70,7 @@ import latestVersion from '@badisi/latest-version';
     const pkgs = await latestVersion(['npm', 'npm@1.3.2', 'npm@beta', '@scope/name@^5.0.2']);
 
     // Package.json
-    const pkgs = await latestVersion(JSON.parse(readFileSync('package.json')));
+    const pkgs = await latestVersion(JSON.parse(readFileSync('package.json').toString()));
 
     // Using cache
     const pkg = await latestVersion('npm@^5.0.2', { useCache: true });
