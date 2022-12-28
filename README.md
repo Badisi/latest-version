@@ -37,7 +37,7 @@
 ✅ Check if any `updates` are available<br/>
 ✅ Cache support to increase data retrieval performance<br/>
 ✅ Support public/private repositories and proxies<br/>
-✅ [Command line tool](#tool) that helps visualize packages updates<br/>
+✅ [Command line tool](#command-line-tool) that helps visualize packages updates<br/>
 
 ## Installation
 
