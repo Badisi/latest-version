@@ -308,34 +308,29 @@ const getInstalledVersion = (pkgName: string, location: keyof InstalledVersions 
                 return undefined;
             }
             return require(join(yarn.packages, pkgName, 'package.json'))?.version as string;
-        } else {
-            let pkgPath = '';
-            try {
-                pkgPath = require.resolve(join(pkgName, 'package.json'));
-            } catch {
-                /**
-                 * require.resolve() may fail with the following error: ERR_PACKAGE_PATH_NOT_EXPORTED
-                 * In such a case, local package.json will be retrieved manually
-                 *
-                 * @see https://github.com/nodejs/node/issues/33460
-                 * @see https://github.com/nodejs/loaders/issues/26
-                 */
-                const allPaths = require.resolve.paths('/');
-                const { root } = parse(process.cwd());
-                const rootIndex = allPaths?.indexOf(join(root, 'node_modules'));
-                if (rootIndex && (rootIndex > -1)) {
-                    const localPaths = allPaths?.splice(0, rootIndex + 1) ?? [];
-                    // eslint-disable-next-line @typescript-eslint/prefer-for-of
-                    for (let i = 0; i < localPaths.length; i++) {
-                        pkgPath = join(localPaths[i], pkgName, 'package.json');
-                        if (existsSync(pkgPath)) {
-                            break;
-                        }
-                    }
+        } else if (location === 'local') {
+            /**
+             * Compute the local paths manually as require.resolve() and require.resolve.paths()
+             * cannot be trusted anymore.
+             *
+             * @see https://github.com/nodejs/node/issues/33460
+             * @see https://github.com/nodejs/loaders/issues/26
+             */
+            const { root } = parse(process.cwd());
+            let path = process.cwd();
+            const localPaths = [join(path, 'node_modules')];
+            while (path !== root) {
+                path = dirname(path);
+                localPaths.push(join(path, 'node_modules'));
+            }
+            for (const localPath of localPaths) {
+                const pkgPath = join(localPath, pkgName, 'package.json');
+                if (existsSync(pkgPath)) {
+                    return require(pkgPath)?.version as string;
                 }
             }
-            return require(pkgPath)?.version as string;
         }
+        return undefined;
     } catch {
         return undefined;
     }
