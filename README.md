@@ -140,22 +140,20 @@ interface LatestVersionOptions {
      * Awaiting the api to return might take time, depending on the network, and might impact your package loading performance.
      * You can use the cache mechanism to improve load performance and reduce unnecessary network requests.
      * If `useCache` is not supplied, the api will always check for updates and wait for every requests to return before returning itself.
-     * If `useCache` is used, the api will always returned immediately, with either (for each provided packages):
-     * 1) a latest/next version available if a cache was found
-     * 2) no latest/next version available if no cache was found - in such case updates will be fetched in the background and a cache will
-     * be created for each provided packages and made available for the next call to the api.
+     * If `useCache` is used, the api will either (for each provided packages):
+     * 1) return immediately if a cache was found.
+     * 2) fetch and wait for updates of that particular package then creates a cache for it so that it is available for the next call to the api.
      *
      * @default false
      */
     useCache?: boolean;
 
     /**
-     * How long the cache for the provided packages should be used before being refreshed (in milliseconds).
+     * How long the cache for each provided packages should be used before being refreshed (in milliseconds).
      * If `useCache` is not supplied, this option has no effect.
      * If `0` is used, this will force the cache to refresh immediately:
-     * 1) The api will returned immediately (without any latest nor next version available for the provided packages)
-     * 2) New updates will be fetched in the background
-     * 3) The cache for each provided packages will be refreshed and made available for the next call to the api
+     * 1) New updates will be fetched and waited
+     * 2) The cache for each provided packages will be refreshed and made available for the next call to the api
      *
      * @default ONE_DAY
      */

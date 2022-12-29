@@ -1,7 +1,7 @@
 import { blue, bold, cyan, green, italic, magenta, red, reset, strip, underline, yellow } from '@colors/colors/safe';
 import { existsSync, readFileSync } from 'fs';
 import { dirname } from 'path';
-import latestVersion, { type Package, type PackageJson, type LatestVersionPackage } from './index';
+import latestVersion, { type Package, type PackageJson, type LatestVersionPackage, LatestVersionOptions } from './index';
 import semverMajor from 'semver/functions/major';
 import semverDiff from 'semver/functions/diff';
 import ora from 'ora';
@@ -191,12 +191,15 @@ const displayTable = (updates: LatestVersionPackage[]): void => {
     }
 };
 
-const checkVersions = async (packages: Package | Package[] | PackageJson): Promise<void> => {
+const checkVersions = async (
+    packages: Package | Package[] | PackageJson,
+    options: LatestVersionOptions = { useCache: true }
+): Promise<void> => {
     const spinner = ora({ text: cyan('Checking versions...') });
     spinner.start();
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const latestVersionPackages = await latestVersion(packages, { useCache: false });
+    const latestVersionPackages = await latestVersion(packages, options);
     spinner.stop();
     displayTable(latestVersionPackages);
 };

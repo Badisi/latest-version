@@ -278,16 +278,16 @@ describe('@badisi/latest-version', () => {
                         setTimeout(() => done(), 1000); // give time for the cache to be persisted
                     });
             });
-            it('first call -> data should be undefined and returned immediately', () => {
+            it('first call -> data should be defined', () => {
                 testPkg(pkgsCached[0], {
                     name: 'npm',
-                    local: undefined, globalNpm: undefined, globalYarn: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: '^5.0.2',
+                    local: undefined, globalNpm: undefined, globalYarn: undefined, latest: TO_BE_DEFINED, next: undefined, wanted: TO_BE_DEFINED, wantedTagOrRange: '^5.0.2',
                     updatesAvailable: false,
                     error: undefined
                 });
                 testPkg(pkgsCached[1], {
                     name: '@badisi/latest-version',
-                    local: undefined, globalNpm: undefined, globalYarn: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: 'latest',
+                    local: undefined, globalNpm: undefined, globalYarn: undefined, latest: TO_BE_DEFINED, next: undefined, wanted: TO_BE_DEFINED, wantedTagOrRange: 'latest',
                     updatesAvailable: false,
                     error: undefined
                 });
@@ -339,19 +339,19 @@ describe('@badisi/latest-version', () => {
                         setTimeout(() => done(), 1000); // give time for the cache to be persisted
                     });
             });
-            it('second call with cacheMaxAge=0 -> data should be undefined and returned immediately', (done) => {
+            it('second call with cacheMaxAge=0 -> data should be defined', (done) => {
                 void latestVersion(['npm@^5.0.2', '@badisi/latest-version'], { useCache: true, cacheMaxAge: 0 })
                     .then((value: LatestVersionPackage[]) => {
                         setTimeout(() => {
                             testPkg(value[0], {
                                 name: 'npm',
-                                local: undefined, globalNpm: undefined, globalYarn: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: '^5.0.2',
+                                local: undefined, globalNpm: undefined, globalYarn: undefined, latest: TO_BE_DEFINED, next: undefined, wanted: TO_BE_DEFINED, wantedTagOrRange: '^5.0.2',
                                 updatesAvailable: false,
                                 error: undefined
                             });
                             testPkg(value[1], {
                                 name: '@badisi/latest-version',
-                                local: undefined, globalNpm: undefined, globalYarn: undefined, latest: undefined, next: undefined, wanted: undefined, wantedTagOrRange: 'latest',
+                                local: undefined, globalNpm: undefined, globalYarn: undefined, latest: TO_BE_DEFINED, next: undefined, wanted: TO_BE_DEFINED, wantedTagOrRange: 'latest',
                                 updatesAvailable: false,
                                 error: undefined
                             });

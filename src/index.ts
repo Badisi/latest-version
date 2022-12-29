@@ -181,7 +181,7 @@ interface PackageMetadata {
     distTags: Record<string, string>;
 }
 
-const ONE_DAY = 1000 * 60 * 60 * 24; // eslint-disable-line @typescript-eslint/naming-convention
+export const ONE_DAY = 1000 * 60 * 60 * 24; // eslint-disable-line @typescript-eslint/naming-convention
 
 const isPackageJson = (obj: any): obj is PackageJson => {
     return ((obj as PackageJson).dependencies !== undefined) ||
@@ -263,23 +263,26 @@ const saveMetadataToCache = (pkg: PackageMetadata): void => {
 };
 
 const getMetadataFromCache = (pkgName: string, options?: LatestVersionOptions): PackageMetadata | undefined => {
-    const pkgCacheFilePath = join(getCacheDir(), `${pkgName}.json`);
-    if (existsSync(pkgCacheFilePath)) {
-        const pkg = JSON.parse(readFileSync(pkgCacheFilePath).toString()) as PackageMetadata;
-        const maxAge = (options?.cacheMaxAge !== undefined) ? options.cacheMaxAge : ONE_DAY;
-        if ((Date.now() - pkg.lastUpdateDate) < maxAge) {
-            return pkg;
+    const maxAge = options?.cacheMaxAge ?? ONE_DAY;
+    if (maxAge !== 0) {
+        const pkgCacheFilePath = join(getCacheDir(), `${pkgName}.json`);
+        if (existsSync(pkgCacheFilePath)) {
+            const pkg = JSON.parse(readFileSync(pkgCacheFilePath).toString()) as PackageMetadata;
+            if ((Date.now() - pkg.lastUpdateDate) < maxAge) {
+                return pkg;
+            }
         }
     }
-    return undefined;
+    return undefined; // invalidates cache
 };
 
-const getRegistryVersions = async (pkgName: string, tagOrRange?: string, options?: LatestVersionOptions): Promise<RegistryVersions | void> => {
+const getRegistryVersions = async (pkgName: string, tagOrRange?: string, options?: LatestVersionOptions): Promise<RegistryVersions> => {
     let pkgMetadata: PackageMetadata | undefined;
     if (pkgName.length && options?.useCache) {
         pkgMetadata = getMetadataFromCache(pkgName, options);
         if (!pkgMetadata) {
-            return downloadMetadata(pkgName, options).then(saveMetadataToCache);
+            pkgMetadata = await downloadMetadata(pkgName, options);
+            saveMetadataToCache(pkgMetadata);
         }
     } else if (pkgName.length) {
         pkgMetadata = await downloadMetadata(pkgName, options);
