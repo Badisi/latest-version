@@ -1,5 +1,6 @@
 import { blue, bold, cyan, green, italic, magenta, red, reset, strip, underline, yellow } from '@colors/colors/safe';
 import { existsSync, readFileSync } from 'fs';
+import { dirname } from 'path';
 import latestVersion, { type Package, type PackageJson, type LatestVersionPackage } from './index';
 import semverMajor from 'semver/functions/major';
 import semverDiff from 'semver/functions/diff';
@@ -78,7 +79,6 @@ const drawBox = (lines: string[], color = yellow, horizontalPadding = 3): void =
         console.log(`${color('│')}${padding}${reset(fullRow)}${padding}${color('│')}`);
     });
     console.log(color(`└${'─'.repeat(maxLineWidth + (horizontalPadding * 2))}┘`));
-    console.log();
 };
 
 const getTableColumns = (rows: TableRow[]): TableColumn[] => {
@@ -207,6 +207,7 @@ void (async () => {
     // If argument is a package.json file
     if ((args.length === 1) && args[0].endsWith('package.json')) {
         if (existsSync(args[0])) {
+            process.chdir(dirname(args[0]));
             await checkVersions(JSON.parse(readFileSync(args[0]).toString()) as PackageJson);
         } else {
             console.log(cyan('No package.json file were found'));
