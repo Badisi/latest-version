@@ -50,7 +50,8 @@ const build = (entryPoint, platform, format, bundleExternals = false, minify = f
         sourcemap: false,
         minify,
         globalName: (bundleExternals) ? CONFIG.buildOptions.browser : undefined,
-        external: (bundleExternals) ? undefined : CONFIG.buildOptions.externals
+        // When compiling "cli.ts" do not embed "./index" = "index.js"
+        external: (bundleExternals) ? undefined : [...CONFIG.buildOptions.externals, './index']
     };
     mkdirSync(CONFIG.distPath, { recursive: true });
     buildSync(options);
