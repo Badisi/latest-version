@@ -192,7 +192,7 @@ $ latest-version <packageJson|packageName...>
   Examples:
     $ lv
     $ latest-version path/to/package.json
-    $ latest-version package1 package2 package3
+    $ latest-version package1 package2 package3 --skip-missing
 ```
 
 ![CLI utility preview][clipreview]

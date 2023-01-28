@@ -193,13 +193,17 @@ const displayTable = (updates: LatestVersionPackage[]): void => {
 
 const checkVersions = async (
     packages: Package | Package[] | PackageJson,
+    skipMissing: boolean,
     options: LatestVersionOptions = { useCache: true }
 ): Promise<void> => {
     const spinner = ora({ text: cyan('Checking versions...') });
     spinner.start();
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const latestVersionPackages = await latestVersion(packages, options);
+    let latestVersionPackages: LatestVersionPackage[] = await latestVersion(packages, options);
+    if (skipMissing) {
+        latestVersionPackages = latestVersionPackages.filter(pkg => (pkg.local || pkg.globalNpm || pkg.globalYarn));
+    }
     spinner.stop();
     displayTable(latestVersionPackages);
 };
@@ -207,11 +211,16 @@ const checkVersions = async (
 void (async () => {
     let args = process.argv.slice(2);
 
+    const skipMissing = args.includes('--skip-missing');
+
+    // Remove any options from the arguments
+    args = args.filter(arg => !arg.startsWith('-'));
+
     // If argument is a package.json file
     if ((args.length === 1) && args[0].endsWith('package.json')) {
         if (existsSync(args[0])) {
             process.chdir(dirname(args[0]));
-            await checkVersions(JSON.parse(readFileSync(args[0]).toString()) as PackageJson);
+            await checkVersions(JSON.parse(readFileSync(args[0]).toString()) as PackageJson, skipMissing);
         } else {
             console.log(cyan('No package.json file were found'));
         }
@@ -236,10 +245,10 @@ void (async () => {
                 }
                 return arg;
             });
-            await checkVersions(args);
+            await checkVersions(args, skipMissing);
         // ...else check the local package.json if any
         } else if (localPkgJson) {
-            await checkVersions(localPkgJson);
+            await checkVersions(localPkgJson, skipMissing);
         // ...else do nothing
         } else {
             console.log(cyan('No packages were found'));
