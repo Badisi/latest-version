@@ -1,4 +1,4 @@
-import { blue, bold, cyan, green, italic, magenta, red, reset, strip, underline, yellow } from '@colors/colors/safe';
+import { blue, bold, cyan, gray, green, italic, magenta, red, reset, strip, underline, yellow } from '@colors/colors/safe';
 import { existsSync, readFileSync } from 'fs';
 import { dirname } from 'path';
 import latestVersion, { type Package, type PackageJson, type LatestVersionPackage, LatestVersionOptions } from './index';
@@ -51,6 +51,7 @@ const columnCellRenderer = (column: TableColumn, row: TableRow): string => {
     switch (column.attrName) {
         case 'name': text = yellow(text); break;
         case 'installed': case 'separator': text = blue(text); break;
+        case 'location': case 'tagOrRange': text = gray(text); break;
         case 'wanted': text = colorizeDiff(row.installed, text); break;
         case 'latest':
             if (text !== row.wanted) {
@@ -86,7 +87,8 @@ const getTableColumns = (rows: TableRow[]): TableColumn[] => {
         { label: 'Package', attrName: 'name', align: 'left', maxLength: 0, items: [] },
         { label: 'Location', attrName: 'location', align: 'left', maxLength: 0, items: [] },
         { label: 'Installed', attrName: 'installed', align: 'right', maxLength: 0, items: [] },
-        { label: '', attrName: 'tagOrRange', align: 'right', maxLength: 0, items: [] },
+        { label: '', attrName: 'separator', align: 'center', maxLength: 0, items: [] },
+        { label: 'Range', attrName: 'tagOrRange', align: 'right', maxLength: 0, items: [] },
         { label: '', attrName: 'separator', align: 'center', maxLength: 0, items: [] },
         { label: 'Wanted', attrName: 'wanted', align: 'right', maxLength: 0, items: [] },
         { label: 'Latest', attrName: 'latest', align: 'right', maxLength: 0, items: [] }
