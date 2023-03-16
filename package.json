@@ -40,7 +40,7 @@
         "module"
     ],
     "scripts": {
-        "ncu": "npx ncu -i --format=group --packageFile '{,projects/**/}package.json'",
+        "ncu": "npx npm-check-updates -i --format=group --packageFile '{,projects/**/}package.json'",
         "start": "ts-node --project=./tsconfig.json ./src/cli",
         "lint": "eslint ./src/**/*.ts --ignore-pattern *.spec.ts",
         "test": "ts-node ./node_modules/jasmine/bin/jasmine.js --config=jasmine.json",
