@@ -53,29 +53,29 @@
         "global-dirs": "^3.0.1",
         "@colors/colors": "^1.5.0",
         "registry-auth-token": "^5.0.2",
-        "semver": "^7.3.8",
+        "semver": "^7.4.0",
         "ora": "5.4.1"
     },
     "devDependencies": {
         "@types/fs-extra": "^11.0.1",
         "@types/jasmine": "^4.3.1",
-        "@types/node": "^18.15.5",
+        "@types/node": "^18.15.11",
         "@types/registry-auth-token": "^4.2.1",
         "@types/rewire": "^2.5.28",
         "@types/semver": "^7.3.13",
-        "@typescript-eslint/eslint-plugin": "^5.56.0",
-        "@typescript-eslint/parser": "^5.56.0",
+        "@typescript-eslint/eslint-plugin": "^5.58.0",
+        "@typescript-eslint/parser": "^5.58.0",
         "cpy": "^9.0.1",
-        "esbuild": "^0.17.12",
-        "eslint": "^8.36.0",
+        "esbuild": "^0.17.16",
+        "eslint": "^8.38.0",
         "eslint-plugin-import": "^2.27.5",
-        "eslint-plugin-jsdoc": "^40.1.0",
+        "eslint-plugin-jsdoc": "^41.1.1",
         "eslint-plugin-prefer-arrow": "^1.2.3",
         "fs-extra": "^11.1.1",
         "jasmine": "^4.6.0",
         "jasmine-spec-reporter": "^7.0.0",
         "rewire": "^6.0.0",
         "ts-node": "^10.9.1",
-        "typescript": "^5.0.2"
+        "typescript": "^5.0.4"
     }
 }
