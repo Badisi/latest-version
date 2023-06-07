@@ -1,6 +1,6 @@
 {
     "name": "@badisi/latest-version",
-    "version": "6.1.5",
+    "version": "6.1.6",
     "description": "Get latest versions of packages",
     "homepage": "https://github.com/badisi/latest-version",
     "license": "MIT",
