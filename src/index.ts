@@ -216,6 +216,10 @@ const downloadMetadata = (pkgName: string, options?: LatestVersionOptions): Prom
                 let rawData = '';
                 res.setEncoding('utf8');
                 res.on('data', (chunk: any) => rawData += chunk);
+                res.once('error', (err) => {
+                    res.removeAllListeners();
+                    return reject(`Request error (${err.message}): ${pkgUrl}`);
+                });
                 res.once('end', () => {
                     res.setTimeout(0);
                     res.removeAllListeners();
@@ -360,7 +364,7 @@ const getInfo = async (pkg: Package, options?: LatestVersionOptions): Promise<La
         const globalYarn = (pkgInfo.globalYarn && pkgInfo.wanted) ? (gt(pkgInfo.wanted, pkgInfo.globalYarn) ? pkgInfo.wanted : false) : false;
         pkgInfo.updatesAvailable = (local || globalNpm || globalYarn) ? { local, globalNpm, globalYarn } : false;
     } catch (err: any) {
-        pkgInfo.error = err?.message || err;
+        pkgInfo.error = err?.message ?? err;
     }
 
     return pkgInfo;
