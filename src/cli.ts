@@ -204,7 +204,7 @@ const checkVersions = async (
     // @ts-ignore
     let latestVersionPackages: LatestVersionPackage[] = await latestVersion(packages, options);
     if (skipMissing) {
-        latestVersionPackages = latestVersionPackages.filter(pkg => (pkg.local || pkg.globalNpm || pkg.globalYarn));
+        latestVersionPackages = latestVersionPackages.filter(pkg => (pkg.local ?? pkg.globalNpm ?? pkg.globalYarn));
     }
     spinner.stop();
     displayTable(latestVersionPackages);
@@ -226,8 +226,9 @@ void (async () => {
         } else {
             console.log(cyan('No package.json file were found'));
         }
+    }
     // else..
-    } else {
+    else {
         // Check if a local package.json file exists
         let localPkgJson: PackageJson | undefined;
         if (existsSync('package.json')) {
@@ -248,11 +249,13 @@ void (async () => {
                 return arg;
             });
             await checkVersions(args, skipMissing);
+        }
         // ...else check the local package.json if any
-        } else if (localPkgJson) {
+        else if (localPkgJson) {
             await checkVersions(localPkgJson, skipMissing);
+        }
         // ...else do nothing
-        } else {
+        else {
             console.log(cyan('No packages were found'));
         }
     }

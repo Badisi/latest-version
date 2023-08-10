@@ -120,7 +120,7 @@ interface LatestVersionOptions {
     readonly requestOptions?: RequestOptions;
 }
 
-type LatestVersion = {
+interface LatestVersion {
     /**
      * Get latest versions of packages from of a package json like object.
      *
@@ -159,9 +159,9 @@ type LatestVersion = {
      * @returns {Promise<LatestVersionPackage[]>}
      */
     (items: Package[], options?: LatestVersionOptions): Promise<LatestVersionPackage[]>; // eslint-disable-line @typescript-eslint/unified-signatures
-};
+}
 type PackageRange = `${'@' | ''}${string}@${string}`;
-type Package = string | PackageRange;
+type Package = PackageRange | string; // eslint-disable-line @typescript-eslint/no-redundant-type-constituents
 type PackageJsonDependencies = Record<string, string>;
 type PackageJson = Record<string, any> & ({
     dependencies: PackageJsonDependencies;
@@ -193,7 +193,7 @@ const downloadMetadata = (pkgName: string, options?: LatestVersionOptions): Prom
     return new Promise((resolve, reject) => {
         const i = pkgName.indexOf('/');
         const pkgScope = (i !== -1) ? pkgName.slice(0, i) : '';
-        const registryUrl = options?.registryUrl || getRegistryUrl(pkgScope);
+        const registryUrl = options?.registryUrl ?? getRegistryUrl(pkgScope);
         const pkgUrl = new URL(encodeURIComponent(pkgName).replace(/^%40/, '@'), registryUrl);
 
         let requestOptions: HttpRequestOptions | HttpsRequestOptions = {
@@ -255,8 +255,8 @@ const getCacheDir = (name = '@badisi/latest-version'): string => {
     const homeDir = homedir();
     switch (process.platform) {
         case 'darwin': return join(homeDir, 'Library', 'Caches', name);
-        case 'win32': return join(process.env.LOCALAPPDATA || join(homeDir, 'AppData', 'Local'), name, 'Cache');
-        default: return join(process.env.XDG_CACHE_HOME || join(homeDir, '.cache'), name);
+        case 'win32': return join(process.env.LOCALAPPDATA ?? join(homeDir, 'AppData', 'Local'), name, 'Cache');
+        default: return join(process.env.XDG_CACHE_HOME ?? join(homeDir, '.cache'), name);
     }
 };
 
@@ -296,10 +296,10 @@ const getRegistryVersions = async (pkgName: string, tagOrRange?: string, options
         latest: pkgMetadata?.distTags?.latest,
         next: pkgMetadata?.distTags?.next
     };
-    if (tagOrRange && pkgMetadata?.distTags && pkgMetadata?.distTags[tagOrRange]) {
+    if (tagOrRange && pkgMetadata?.distTags?.[tagOrRange]) {
         versions.wanted = pkgMetadata.distTags[tagOrRange];
     } else if (tagOrRange && pkgMetadata?.versions?.length) {
-        versions.wanted = maxSatisfying(pkgMetadata.versions, tagOrRange) || undefined;
+        versions.wanted = maxSatisfying(pkgMetadata.versions, tagOrRange) ?? undefined;
     }
     return versions;
 };
@@ -371,7 +371,7 @@ const getInfo = async (pkg: Package, options?: LatestVersionOptions): Promise<La
 };
 
 const latestVersion: LatestVersion = async (arg: Package | Package[] | PackageJson, options?: LatestVersionOptions): Promise<any> => {
-    const pkgs: string[] = [];
+    const pkgs: Package[] = [];
     if (typeof arg === 'string') {
         pkgs.push(arg);
     } else if (Array.isArray(arg)) {
@@ -387,7 +387,7 @@ const latestVersion: LatestVersion = async (arg: Package | Package[] | PackageJs
         addDeps(arg.peerDependencies as PackageJsonDependencies);
     }
 
-    const jobs = await Promise.allSettled(pkgs.map((pkg: string) => getInfo(pkg, options)));
+    const jobs = await Promise.allSettled(pkgs.map(pkg => getInfo(pkg, options)));
     const results = jobs.map((jobResult: PromiseSettledResult<LatestVersionPackage>) =>
         (jobResult as PromiseFulfilledResult<LatestVersionPackage>).value);
     return (typeof arg === 'string') ? results[0] : results;
