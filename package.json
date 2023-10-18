@@ -48,7 +48,7 @@
         "build": "node ./build.mjs"
     },
     "engines": {
-        "node": ">= 15"
+        "node": ">= 18"
     },
     "dependencies": {
         "@colors/colors": "^1.6.0",
@@ -58,26 +58,26 @@
         "semver": "^7.5.4"
     },
     "devDependencies": {
-        "@types/fs-extra": "^11.0.1",
-        "@types/jasmine": "^4.3.5",
-        "@types/node": "^20.4.9",
-        "@types/registry-auth-token": "^4.2.1",
-        "@types/rewire": "^2.5.28",
-        "@types/semver": "^7.5.0",
-        "@typescript-eslint/eslint-plugin": "^6.3.0",
-        "@typescript-eslint/parser": "^6.3.0",
+        "@types/fs-extra": "^11.0.2",
+        "@types/jasmine": "^5.1.1",
+        "@types/node": "^20.8.7",
+        "@types/registry-auth-token": "^4.2.2",
+        "@types/rewire": "^2.5.29",
+        "@types/semver": "^7.5.3",
+        "@typescript-eslint/eslint-plugin": "^6.8.0",
+        "@typescript-eslint/parser": "^6.8.0",
         "cpy": "^10.1.0",
-        "esbuild": "^0.19.0",
-        "eslint": "^8.46.0",
-        "eslint-plugin-import": "^2.28.0",
-        "eslint-plugin-jsdoc": "^46.4.6",
+        "esbuild": "^0.19.5",
+        "eslint": "^8.51.0",
+        "eslint-plugin-import": "^2.28.1",
+        "eslint-plugin-jsdoc": "^46.8.2",
         "eslint-plugin-prefer-arrow": "^1.2.3",
         "fs-extra": "^11.1.1",
         "jasmine": "^5.1.0",
         "jasmine-spec-reporter": "^7.0.0",
-        "rewire": "^6.0.0",
+        "rewire": "^7.0.0",
         "ts-node": "^10.9.1",
-        "tslib": "^2.6.1",
-        "typescript": "^5.1.6"
+        "tslib": "^2.6.2",
+        "typescript": "^5.2.2"
     }
 }
