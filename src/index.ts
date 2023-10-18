@@ -221,7 +221,6 @@ const downloadMetadata = (pkgName: string, options?: LatestVersionOptions): Prom
                     return reject(`Request error (${err.message}): ${pkgUrl}`);
                 });
                 res.once('end', () => {
-                    res.setTimeout(0);
                     res.removeAllListeners();
                     try {
                         const pkgMetadata = JSON.parse(rawData);
