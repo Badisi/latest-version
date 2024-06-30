@@ -4,7 +4,6 @@ import { dirname } from 'path';
 import latestVersion, { type Package, type PackageJson, type LatestVersionPackage, LatestVersionOptions } from './index';
 import semverMajor from 'semver/functions/major';
 import semverDiff from 'semver/functions/diff';
-import ora from 'ora';
 
 interface TableColumn {
     label: string;
@@ -198,6 +197,7 @@ const checkVersions = async (
     skipMissing: boolean,
     options: LatestVersionOptions = { useCache: true }
 ): Promise<void> => {
+    const ora = (await import('ora')).default;
     const spinner = ora({ text: cyan('Checking versions...') });
     spinner.start();
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
