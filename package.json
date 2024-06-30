@@ -45,7 +45,9 @@
         "start": "ts-node --project=./tsconfig.json ./src/cli",
         "lint": "eslint ./src/**/*.ts --ignore-pattern *.spec.ts",
         "test": "ts-node ./node_modules/jasmine/bin/jasmine.js --config=jasmine.json",
-        "build": "node ./build.mjs"
+        "test:ci": "npm run test",
+        "build": "node ./build.mjs",
+        "release": "npm publish ./dist --access public"
     },
     "engines": {
         "node": ">= 18"
