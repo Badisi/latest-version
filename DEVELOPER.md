@@ -1,19 +1,36 @@
 # Development
 
-This document describes how you can test, build and publish the library.
+This document describes how you can lint, test, build and publish this project.
 
 ## Prerequisite
 
-Before you can build and test this library you must install and configure the following products on your development machine:
+Before you can start you must install and configure the following products on your development machine:
 
 * [Node.js][nodejs]
 * [Git][git]
 
-You will then need to install the library required dependencies:
+You will then need to clone this project and install the required dependencies:
 
 ```sh
-cd <library-path>
+git clone <repository_url> <dir_name>
+cd <dir_name>
 npm install
+```
+
+## Linting/verifying source code
+
+Check that the code is properly formatted and adheres to coding style.
+
+```sh
+npm run lint
+```
+
+## Unit testing
+
+Ensure that each unit of the library performs as expected.
+
+```sh
+npm run test
 ```
 
 ## Testing locally
@@ -36,22 +53,6 @@ You can test the library while developing it, as follow:
    ```sh
    npx ts-node test.ts
    ```
-
-## Unit testing
-
-Ensure that each unit of the library performs as expected.
-
-```sh
-npm run test
-```
-
-## Linting/verifying source code
-
-Check that the code is properly formatted and adheres to coding style.
-
-```sh
-npm run lint
-```
 
 ## Building the library
 
