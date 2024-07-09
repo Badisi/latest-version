@@ -6,9 +6,11 @@ on:
 
 jobs:
   ci_tests:
-    uses: peter-evans/repository-dispatch@v3
-    with:
-      event-type: ci_tests
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: peter-evans/repository-dispatch@v3
+        with:
+          event-type: ci_tests
 
   ci_release:
     needs: ci_tests
