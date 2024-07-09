@@ -62,17 +62,17 @@
     "devDependencies": {
         "@types/fs-extra": "^11.0.4",
         "@types/jasmine": "^5.1.4",
-        "@types/node": "^20.14.9",
+        "@types/node": "^20.14.10",
         "@types/registry-auth-token": "^4.2.4",
         "@types/rewire": "^2.5.30",
         "@types/semver": "^7.5.8",
-        "@typescript-eslint/eslint-plugin": "^7.14.1",
-        "@typescript-eslint/parser": "^7.14.1",
+        "@typescript-eslint/eslint-plugin": "^7.16.0",
+        "@typescript-eslint/parser": "^7.16.0",
         "cpy": "^11.0.1",
-        "esbuild": "^0.21.5",
+        "esbuild": "^0.23.0",
         "eslint": "^8.57.0",
         "eslint-plugin-import": "^2.29.1",
-        "eslint-plugin-jsdoc": "^48.5.0",
+        "eslint-plugin-jsdoc": "^48.5.2",
         "eslint-plugin-prefer-arrow": "^1.2.3",
         "fs-extra": "^11.2.0",
         "jasmine": "^5.1.0",
@@ -80,6 +80,6 @@
         "rewire": "^7.0.0",
         "ts-node": "^10.9.2",
         "tslib": "^2.6.3",
-        "typescript": "^5.5.2"
+        "typescript": "^5.5.3"
     }
 }
