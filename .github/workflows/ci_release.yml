@@ -5,7 +5,13 @@ on:
     types: [created]
 
 jobs:
+  ci_tests:
+    uses: peter-evans/repository-dispatch@v3
+    with:
+      event-type: ci_tests
+
   ci_release:
+    needs: ci_tests
     uses: dsi-hug/action/.github/workflows/action.yml@v1
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
