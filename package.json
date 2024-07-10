@@ -19,12 +19,12 @@
         "./package.json": "./package.json"
     },
     "bin": {
-        "latest-version": "./bin/latest-version",
-        "lv": "./bin/latest-version"
+        "latest-version": "bin/latest-version",
+        "lv": "bin/latest-version"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/badisi/latest-version.git"
+        "url": "git+https://github.com/badisi/latest-version.git"
     },
     "keywords": [
         "npm",
