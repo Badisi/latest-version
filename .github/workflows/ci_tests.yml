@@ -2,8 +2,7 @@ name: Run tests
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [ci_tests]
+  workflow_call:
   push:
     branches:
       - '**'
@@ -16,7 +15,7 @@ concurrency:
 
 jobs:
   ci_tests:
-    uses: dsi-hug/action/.github/workflows/action.yml@v1
+    uses: dsi-hug/actions/.github/workflows/action.yml@v2
     with:
       runs-on: '["ubuntu-latest", "macos-latest", "windows-latest"]'
       node-versions: '[18, 20]'

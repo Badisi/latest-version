@@ -6,15 +6,11 @@ on:
 
 jobs:
   ci_tests:
-    runs-on: 'ubuntu-latest'
-    steps:
-      - uses: peter-evans/repository-dispatch@v3
-        with:
-          event-type: ci_tests
+    uses: ./.github/workflows/ci_tests.yml
 
   ci_release:
     needs: ci_tests
-    uses: dsi-hug/action/.github/workflows/action.yml@v1
+    uses: dsi-hug/actions/.github/workflows/action.yml@v2
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
     with:
