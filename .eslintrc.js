@@ -25,43 +25,24 @@ module.exports = {
         "eslint-plugin-import",
         "eslint-plugin-jsdoc",
         "eslint-plugin-prefer-arrow",
-        "@typescript-eslint"
+        "@typescript-eslint",
+        "@stylistic"
     ],
     "rules": {
+        "@typescript-eslint/prefer-promise-reject-errors": "off",
+        "@typescript-eslint/no-require-imports": "off",
         "@typescript-eslint/restrict-template-expressions": "off",
         "@typescript-eslint/no-unsafe-member-access": "off",
         "@typescript-eslint/no-unsafe-assignment": "off",
         "@typescript-eslint/no-unsafe-call": "off",
         "@typescript-eslint/adjacent-overload-signatures": "error",
         "@typescript-eslint/array-type": "off",
-        "@typescript-eslint/ban-types": [
-            "error",
-            {
-                "types": {
-                    "Object": {
-                        "message": "Avoid using the `Object` type. Did you mean `object`?"
-                    },
-                    "Function": {
-                        "message": "Avoid using the `Function` type. Prefer a specific function type, like `() => void`."
-                    },
-                    "Boolean": {
-                        "message": "Avoid using the `Boolean` type. Did you mean `boolean`?"
-                    },
-                    "Number": {
-                        "message": "Avoid using the `Number` type. Did you mean `number`?"
-                    },
-                    "String": {
-                        "message": "Avoid using the `String` type. Did you mean `string`?"
-                    },
-                    "Symbol": {
-                        "message": "Avoid using the `Symbol` type. Did you mean `symbol`?"
-                    }
-                }
-            }
-        ],
+        "@typescript-eslint/no-unsafe-function-type": "error",
+        "@typescript-eslint/no-wrapper-object-types": "error",
+        "@typescript-eslint/no-empty-object-type": "error",
         "@typescript-eslint/consistent-type-assertions": "error",
         "@typescript-eslint/dot-notation": "off",
-        "@typescript-eslint/indent": [
+        "@stylistic/indent": [
             "error",
             4,
             {
@@ -74,7 +55,7 @@ module.exports = {
                 }
             }
         ],
-        "@typescript-eslint/member-delimiter-style": [
+        "@stylistic/member-delimiter-style": [
             "error",
             {
                 "multiline": {
@@ -121,11 +102,11 @@ module.exports = {
         "@typescript-eslint/prefer-for-of": "error",
         "@typescript-eslint/prefer-function-type": "error",
         "@typescript-eslint/prefer-namespace-keyword": "error",
-        "@typescript-eslint/quotes": [
+        "@stylistic/quotes": [
             "error",
             "single"
         ],
-        "@typescript-eslint/semi": [
+        "@stylistic/semi": [
             "error",
             "always"
         ],
@@ -137,7 +118,7 @@ module.exports = {
                 "lib": "always"
             }
         ],
-        "@typescript-eslint/type-annotation-spacing": "error",
+        "@stylistic/type-annotation-spacing": "error",
         "@typescript-eslint/unified-signatures": "error",
         "arrow-body-style": "off",
         "complexity": "off",
