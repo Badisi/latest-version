@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   ci_tests:
-    uses: dsi-hug/actions/.github/workflows/action.yml@v2
+    uses: badisi/actions/.github/workflows/action.yml@v1
     with:
       runs-on: '["ubuntu-latest", "macos-latest", "windows-latest"]'
       node-versions: '[18, 20]'
