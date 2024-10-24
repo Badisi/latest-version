@@ -32,9 +32,10 @@ const execCmd = (cmd, opts) => new Promise((resolve, reject) => {
     exec(cmd, opts, (err, stdout, stderr) => {
         if (err) {
             console.error(stdout, stderr);
-            return reject(err);
+            reject(err);
+            return;
         }
-        return resolve(stdout);
+        resolve(stdout);
     });
 });
 

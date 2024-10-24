@@ -48,7 +48,6 @@ interface LatestVersionPackage extends InstalledVersions, RegistryVersions {
     name: string;
     /**
      * The tag or version range that was provided (if provided).
-     *
      * @default "latest"
      */
     wantedTagOrRange?: string;
@@ -82,7 +81,6 @@ interface LatestVersionOptions {
      * 1) a latest/next version available if a cache was found
      * 2) no latest/next version available if no cache was found - in such case updates will be fetched in the background and a cache will
      * be created for each provided packages and made available for the next call to the api.
-     *
      * @default false
      */
     readonly useCache?: boolean;
@@ -94,14 +92,12 @@ interface LatestVersionOptions {
      * 1) The api will returned immediately (without any latest nor next version available for the provided packages)
      * 2) New updates will be fetched in the background
      * 3) The cache for each provided packages will be refreshed and made available for the next call to the api
-     *
      * @default ONE_DAY
      */
     readonly cacheMaxAge?: number;
 
     /**
      * A JavaScript package registry url that implements the CommonJS Package Registry specification.
-     *
      * @default "Looks at any registry urls in the .npmrc file or fallback to the default npm registry instead"
      * @example <caption>.npmrc</caption>
      * registry = 'https://custom-registry.com/'
@@ -111,7 +107,6 @@ interface LatestVersionOptions {
 
     /**
      * Set of options to be passed down to Node.js http/https request.
-     *
      * @example <caption>Behind a proxy with self-signed certificate</caption>
      * { ca: [ fs.readFileSync('proxy-cert.pem') ] }
      * @example <caption>Bypassing certificate validation</caption>
@@ -123,7 +118,6 @@ interface LatestVersionOptions {
 interface LatestVersion {
     /**
      * Get latest versions of packages from of a package json like object.
-     *
      * @param {PackageJson} item - A package json like object (with dependencies, devDependencies and peerDependencies attributes).
      * @example { dependencies: { 'npm': 'latest' }, devDependencies: { 'npm': '1.3.2' }, peerDependencies: { '@scope/name': '^5.0.2' } }
      * @param {LatestVersionOptions} [options] - An object optionally specifying the use of the cache, the max age of the cache, the registry url and the http or https options.
@@ -136,7 +130,6 @@ interface LatestVersion {
 
     /**
      * Get latest version of a single package.
-     *
      * @param {Package} item - A single package object (represented by a string that should match the following format: `${'@' | ''}${string}@${string}`)
      * @example 'npm', 'npm@1.3.2', '@scope/name@^5.0.2'
      * @param {LatestVersionOptions} [options] - An object optionally specifying the use of the cache, the max age of the cache, the registry url and the http or https options.
@@ -149,7 +142,6 @@ interface LatestVersion {
 
     /**
      * Get latest versions of a collection of packages.
-     *
      * @param {Package[]} items - A collection of package object (represented by a string that should match the following format: `${'@' | ''}${string}@${string}`)
      * @example ['npm', 'npm@1.3.2', '@scope/name@^5.0.2']
      * @param {LatestVersionOptions} [options] - An object optionally specifying the use of the cache, the max age of the cache, the registry url and the http or https options.
@@ -215,38 +207,38 @@ const downloadMetadata = (pkgName: string, options?: LatestVersionOptions): Prom
             if (res.statusCode === 200) {
                 let rawData = '';
                 res.setEncoding('utf8');
-                res.on('data', (chunk: any) => rawData += chunk);
+                res.on('data', (chunk: string) => rawData += chunk);
                 res.once('error', (err) => {
                     res.removeAllListeners();
-                    return reject(`Request error (${err.message}): ${pkgUrl}`);
+                    reject(`Request error (${err.message}): ${pkgUrl}`);
                 });
                 res.once('end', () => {
                     res.removeAllListeners();
                     try {
                         const pkgMetadata = JSON.parse(rawData);
-                        return resolve({
+                        resolve({
                             name: pkgName,
                             lastUpdateDate: Date.now(),
                             versions: Object.keys(pkgMetadata.versions as string[]),
                             distTags: pkgMetadata['dist-tags']
-                        });
+                        }); return;
                     } catch (err) {
-                        return reject(err);
+                        reject(err); return;
                     }
                 });
             } else {
                 res.removeAllListeners();
                 res.resume(); // consume response data to free up memory
-                return reject(`Request error (${res.statusCode}): ${pkgUrl}`);
+                reject(`Request error (${res.statusCode}): ${pkgUrl}`); return;
             }
         });
         const abort = (error: Error | string): void => {
             request.removeAllListeners();
             request.destroy();
-            return reject(error);
+            reject(error);
         };
-        request.once('timeout', () => abort(`Request timed out: ${pkgUrl}`));
-        request.once('error', (err: Error) => abort(err));
+        request.once('timeout', () => { abort(`Request timed out: ${pkgUrl}`); });
+        request.once('error', (err: Error) => { abort(err); });
     });
 };
 
@@ -292,12 +284,12 @@ const getRegistryVersions = async (pkgName: string, tagOrRange?: string, options
     }
 
     const versions: RegistryVersions = {
-        latest: pkgMetadata?.distTags?.latest,
-        next: pkgMetadata?.distTags?.next
+        latest: pkgMetadata?.distTags.latest,
+        next: pkgMetadata?.distTags.next
     };
-    if (tagOrRange && pkgMetadata?.distTags?.[tagOrRange]) {
+    if (tagOrRange && pkgMetadata?.distTags[tagOrRange]) {
         versions.wanted = pkgMetadata.distTags[tagOrRange];
-    } else if (tagOrRange && pkgMetadata?.versions?.length) {
+    } else if (tagOrRange && pkgMetadata?.versions.length) {
         versions.wanted = maxSatisfying(pkgMetadata.versions, tagOrRange) ?? undefined;
     }
     return versions;
@@ -314,11 +306,10 @@ const getInstalledVersion = (pkgName: string, location: keyof InstalledVersions 
                 return undefined;
             }
             return require(join(yarn.packages, pkgName, 'package.json'))?.version as string;
-        } else if (location === 'local') {
+        } else {
             /**
              * Compute the local paths manually as require.resolve() and require.resolve.paths()
              * cannot be trusted anymore.
-             *
              * @see https://github.com/nodejs/node/issues/33460
              * @see https://github.com/nodejs/loaders/issues/26
              */
@@ -377,9 +368,7 @@ const latestVersion: LatestVersion = async (arg: Package | Package[] | PackageJs
         pkgs.push(...arg);
     } else if (isPackageJson(arg)) {
         const addDeps = (deps: PackageJsonDependencies): void => {
-            if (deps) {
-                pkgs.push(...Object.keys(deps).map((key: string) => `${key}@${deps[key]}`));
-            }
+            pkgs.push(...Object.keys(deps).map((key: string) => `${key}@${deps[key]}`));
         };
         addDeps(arg.dependencies as PackageJsonDependencies);
         addDeps(arg.devDependencies as PackageJsonDependencies);

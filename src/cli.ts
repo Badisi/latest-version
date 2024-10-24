@@ -44,7 +44,7 @@ const colorizeDiff = (from: string, to: string): string => {
 };
 
 const columnCellRenderer = (column: TableColumn, row: TableRow): string => {
-    let text = row[column.attrName] ?? '';
+    let text = row[column.attrName];
     const gap = (text.length < column.maxLength) ? ' '.repeat(column.maxLength - text.length) : '';
 
     switch (column.attrName) {
@@ -92,16 +92,16 @@ const getTableColumns = (rows: TableRow[]): TableColumn[] => {
         { label: 'Wanted', attrName: 'wanted', align: 'right', maxLength: 0, items: [] },
         { label: 'Latest', attrName: 'latest', align: 'right', maxLength: 0, items: [] }
     ];
-    rows.forEach(row =>
+    rows.forEach(row => {
         columns.forEach(column => {
-            column.maxLength = Math.max(column.label.length, column.maxLength, row[column.attrName]?.length || 0);
-        })
-    );
+            column.maxLength = Math.max(column.label.length, column.maxLength, row[column.attrName].length || 0);
+        });
+    });
     return columns;
 };
 
 const getTableRows = (updates: LatestVersionPackage[]): TableRow[] => {
-    return updates.reduce((all, pkg) => {
+    return updates.reduce<TableRow[]>((all, pkg) => {
         const { name, latest, local, globalNpm, globalYarn, wantedTagOrRange, updatesAvailable } = pkg;
         const getGroup = (a?: string, b?: string): TableRowGroup => {
             if (b && (semverMajor(b) === 0)) {
@@ -120,8 +120,8 @@ const getTableRows = (updates: LatestVersionPackage[]): TableRow[] => {
         };
         const add = (group: TableRowGroup, location: string, installed?: string, wanted?: string) =>
             all.push({
-                name: ' ' + (name ?? 'unknown'),
-                location: location ?? 'unknown',
+                name: ' ' + name,
+                location,
                 installed: installed ?? 'unknown',
                 latest: latest ?? 'unknown',
                 tagOrRange: wantedTagOrRange ?? 'unknown',
@@ -154,7 +154,7 @@ const getTableRows = (updates: LatestVersionPackage[]): TableRow[] => {
             }
         }
         return all;
-    }, [] as TableRow[]);
+    }, []);
 };
 
 const displayTable = (updates: LatestVersionPackage[]): void => {
@@ -241,11 +241,11 @@ void (async () => {
             // Map arguments with any range that could be found in local package.json
             args = args.map(arg => {
                 if (localPkgJson?.dependencies?.[arg]) {
-                    return `${arg}@${localPkgJson?.dependencies?.[arg]}`;
+                    return `${arg}@${localPkgJson.dependencies?.[arg]}`;
                 } else if (localPkgJson?.devDependencies?.[arg]) {
-                    return `${arg}@${localPkgJson?.devDependencies?.[arg]}`;
+                    return `${arg}@${localPkgJson.devDependencies?.[arg]}`;
                 } else if (localPkgJson?.peerDependencies?.[arg]) {
-                    return `${arg}@${localPkgJson?.peerDependencies?.[arg]}`;
+                    return `${arg}@${localPkgJson.peerDependencies?.[arg]}`;
                 }
                 return arg;
             });

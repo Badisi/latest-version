@@ -43,7 +43,7 @@
     "scripts": {
         "ncu": "npx npm-check-updates -i --format=group --packageFile '{,projects/**/}package.json'",
         "start": "ts-node --project=./tsconfig.json ./src/cli",
-        "lint": "eslint ./src/**/*.ts --ignore-pattern *.spec.ts",
+        "lint": "eslint .",
         "test": "ts-node ./node_modules/jasmine/bin/jasmine.js --config=jasmine.json",
         "test:ci": "npm run test",
         "build": "node ./build.mjs",
@@ -60,27 +60,28 @@
         "semver": "^7.6.3"
     },
     "devDependencies": {
+        "@eslint/js": "^9.13.0",
         "@stylistic/eslint-plugin": "^2.9.0",
+        "@types/eslint__js": "^8.42.3",
         "@types/fs-extra": "^11.0.4",
         "@types/jasmine": "^5.1.4",
         "@types/node": "^22.7.9",
         "@types/registry-auth-token": "^4.2.4",
         "@types/rewire": "^2.5.30",
         "@types/semver": "^7.5.8",
-        "@typescript-eslint/eslint-plugin": "^8.11.0",
-        "@typescript-eslint/parser": "^8.11.0",
         "cpy": "^11.1.0",
-        "eslint": "^8.57.0",
         "esbuild": "^0.24.0",
-        "eslint-plugin-import": "^2.31.0",
+        "eslint": "^9.13.0",
         "eslint-plugin-jsdoc": "^50.4.3",
         "eslint-plugin-prefer-arrow": "^1.2.3",
         "fs-extra": "^11.2.0",
+        "globals": "^15.11.0",
         "jasmine": "^5.4.0",
         "jasmine-spec-reporter": "^7.0.0",
         "rewire": "^7.0.0",
         "ts-node": "^10.9.2",
         "tslib": "^2.8.0",
-        "typescript": "^5.6.3"
+        "typescript": "^5.6.3",
+        "typescript-eslint": "^8.11.0"
     }
 }
