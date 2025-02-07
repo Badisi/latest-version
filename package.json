@@ -41,7 +41,7 @@
         "module"
     ],
     "scripts": {
-        "ncu": "npx npm-check-updates -i --format=group --packageFile '{,projects/**/}package.json'",
+        "ncu": "npx npm-check-updates -i --format=group --packageFile '{,projects/**/}package.json' --no-deprecated",
         "start": "ts-node --project=./tsconfig.json ./src/cli",
         "lint": "eslint .",
         "test": "ts-node ./node_modules/jasmine/bin/jasmine.js --config=jasmine.json",
