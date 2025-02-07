@@ -367,12 +367,14 @@ const latestVersion: LatestVersion = async (arg: Package | Package[] | PackageJs
     } else if (Array.isArray(arg)) {
         pkgs.push(...arg);
     } else if (isPackageJson(arg)) {
-        const addDeps = (deps: PackageJsonDependencies): void => {
-            pkgs.push(...Object.keys(deps).map((key: string) => `${key}@${deps[key]}`));
+        const addDeps = (deps?: PackageJsonDependencies): void => {
+            if (deps) {
+                pkgs.push(...Object.keys(deps).map((key: string) => `${key}@${deps[key]}`));
+            }
         };
-        addDeps(arg.dependencies as PackageJsonDependencies);
-        addDeps(arg.devDependencies as PackageJsonDependencies);
-        addDeps(arg.peerDependencies as PackageJsonDependencies);
+        addDeps(arg.dependencies as (PackageJsonDependencies | undefined));
+        addDeps(arg.devDependencies as (PackageJsonDependencies | undefined));
+        addDeps(arg.peerDependencies as (PackageJsonDependencies | undefined));
     }
 
     const jobs = await Promise.allSettled(pkgs.map(pkg => getInfo(pkg, options)));
