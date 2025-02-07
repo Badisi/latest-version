@@ -14,10 +14,10 @@ concurrency:
 
 jobs:
   ci_tests:
-    uses: badisi/actions/.github/workflows/action.yml@v1
+    uses: badisi/actions/.github/workflows/action.yml@v2
     with:
       runs-on: '["ubuntu-latest", "macos-latest", "windows-latest"]'
-      node-versions: '[18, 20]'
+      node-versions: '[22]'
       lint: true
       test: true
       build: true
