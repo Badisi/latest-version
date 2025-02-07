@@ -157,9 +157,10 @@ const getTableRows = (updates: LatestVersionPackage[]): TableRow[] => {
     }, []);
 };
 
-const displayTable = (updates: LatestVersionPackage[]): void => {
-    const rows = getTableRows(updates);
-    if (rows.length) {
+const displayTable = (latestVersionPackages: LatestVersionPackage[]): void => {
+    const updates = latestVersionPackages.filter(pkg => pkg.updatesAvailable);
+    if (updates.length) {
+        const rows = getTableRows(updates);
         const hasUpdates = rows.some(row => row.installed !== 'unknown');
         const columns = getTableColumns(rows);
         const columnGap = 2;
