@@ -60,19 +60,19 @@
         "semver": "^7.7.1"
     },
     "devDependencies": {
-        "@eslint/js": "^9.21.0",
+        "@eslint/js": "^9.23.0",
         "@stylistic/eslint-plugin": "^4.2.0",
         "@types/eslint__js": "^8.42.3",
         "@types/fs-extra": "^11.0.4",
         "@types/jasmine": "^5.1.7",
-        "@types/node": "^22.13.8",
+        "@types/node": "^22.14.0",
         "@types/registry-auth-token": "^4.2.4",
         "@types/rewire": "^2.5.30",
-        "@types/semver": "^7.5.8",
+        "@types/semver": "^7.7.0",
         "cpy": "^11.1.0",
-        "esbuild": "^0.25.0",
-        "eslint": "^9.21.0",
-        "eslint-plugin-jsdoc": "^50.6.3",
+        "esbuild": "^0.25.2",
+        "eslint": "^9.23.0",
+        "eslint-plugin-jsdoc": "^50.6.9",
         "eslint-plugin-prefer-arrow": "^1.2.3",
         "fs-extra": "^11.3.0",
         "globals": "^16.0.0",
@@ -81,7 +81,7 @@
         "rewire": "^7.0.0",
         "ts-node": "^10.9.2",
         "tslib": "^2.8.1",
-        "typescript": "^5.7",
-        "typescript-eslint": "^8.25.0"
+        "typescript": "^5.8",
+        "typescript-eslint": "^8.29.0"
     }
 }
