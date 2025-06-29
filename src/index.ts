@@ -238,7 +238,7 @@ const downloadMetadata = (pkgName: string, options?: LatestVersionOptions): Prom
         };
         request.once('timeout', () => { abort(`Request timed out: ${pkgUrl}`); });
         request.once('error', (err: Error) => { abort(err); });
-        request.on('close', () => { request.removeAllListeners(); });
+        request.once('close', () => { request.removeAllListeners(); });
     });
 };
 
