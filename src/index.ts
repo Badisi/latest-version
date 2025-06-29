@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import type { RequestOptions as HttpRequestOptions, Agent, IncomingMessage } from 'http';
+import type { RequestOptions as HttpRequestOptions, Agent, IncomingMessage, OutgoingHttpHeaders } from 'http';
 import type { RequestOptions as HttpsRequestOptions } from 'https';
 import { join, dirname, resolve as pathResolve, parse } from 'path';
 import { npm, yarn } from 'global-dirs';
@@ -196,7 +196,7 @@ const downloadMetadata = (pkgName: string, options?: LatestVersionOptions): Prom
         };
         const authInfo = registryAuthToken(pkgUrl.toString(), { recursive: true });
         if (authInfo && requestOptions.headers) {
-            requestOptions.headers.authorization = `${authInfo.type} ${authInfo.token}`;
+            (requestOptions.headers as OutgoingHttpHeaders).authorization = `${authInfo.type} ${authInfo.token}`;
         }
         if (options?.requestOptions) {
             requestOptions = { ...requestOptions, ...options.requestOptions };
