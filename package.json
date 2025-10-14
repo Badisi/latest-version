@@ -50,12 +50,12 @@
         "release": "npm publish ./dist --access public"
     },
     "engines": {
-        "node": ">= 18"
+        "node": ">= 20"
     },
     "dependencies": {
         "@colors/colors": "^1.6.0",
         "global-dirs": "3.0.1",
-        "ora": "^8.2.0",
+        "ora": "^9.0.0",
         "registry-auth-token": "^5.1.0",
         "semver": "^7.7.3"
     },
@@ -69,7 +69,7 @@
         "@types/registry-auth-token": "^4.2.4",
         "@types/rewire": "^2.5.30",
         "@types/semver": "^7.7.1",
-        "cpy": "^11.1.0",
+        "cpy": "^12.0.1",
         "esbuild": "^0.25.10",
         "eslint": "^9.37.0",
         "eslint-plugin-jsdoc": "^61.1.2",
