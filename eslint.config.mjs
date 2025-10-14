@@ -1,3 +1,4 @@
+import { defineConfig } from 'eslint/config';
 import jsdocPlugin from 'eslint-plugin-jsdoc';
 import tsEslintPlugin from 'typescript-eslint';
 import stylisticPlugin from '@stylistic/eslint-plugin';
@@ -5,7 +6,7 @@ import preferArrowPlugin from 'eslint-plugin-prefer-arrow';
 import eslintJs from '@eslint/js';
 import globals from 'globals';
 
-export default tsEslintPlugin.config(
+export default defineConfig(
     eslintJs.configs.recommended,
     ...tsEslintPlugin.configs.strictTypeChecked,
     ...tsEslintPlugin.configs.stylisticTypeChecked,
