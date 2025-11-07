@@ -2,7 +2,7 @@
     "name": "@badisi/latest-version",
     "version": "8.0.0",
     "description": "Get latest versions of packages",
-    "homepage": "https://github.com/badisi/latest-version",
+    "homepage": "https://github.com/Badisi/latest-version",
     "license": "MIT",
     "author": {
         "name": "Badisi"
@@ -24,7 +24,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/badisi/latest-version.git"
+        "url": "https://github.com/Badisi/latest-version"
     },
     "keywords": [
         "npm",

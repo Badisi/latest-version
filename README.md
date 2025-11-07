@@ -11,14 +11,14 @@
         <img src="https://img.shields.io/npm/v/@badisi/latest-version.svg?color=blue&logo=npm" alt="npm version" /></a>
     <a href="https://npmcharts.com/compare/@badisi/latest-version?minimal=true">
         <img src="https://img.shields.io/npm/dw/@badisi/latest-version.svg?color=7986CB&logo=npm" alt="npm donwloads" /></a>
-    <a href="https://github.com/badisi/latest-version/blob/main/LICENSE">
+    <a href="https://github.com/Badisi/latest-version/blob/main/LICENSE">
         <img src="https://img.shields.io/npm/l/@badisi/latest-version.svg?color=ff69b4" alt="license" /></a>
 </p>
 
 <p align="center">
     <a href="https://github.com/Badisi/latest-version/actions/workflows/ci_tests.yml">
-        <img src="https://github.com/Badisi/latest-version/actions/workflows/ci_tests.yml/badge.svg" alt="build status" /></a>
-    <a href="https://github.com/badisi/latest-version/blob/main/CONTRIBUTING.md#-submitting-a-pull-request-pr">
+        <img src="https://img.shields.io/github/actions/workflow/status/badisi/latest-version/ci_tests.yml?logo=github" alt="build status" /></a>
+    <a href="https://github.com/Badisi/latest-version/blob/main/CONTRIBUTING.md#-submitting-a-pull-request-pr">
         <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs welcome" /></a>
 </p>
 
@@ -214,7 +214,7 @@ Please read and follow the [Code of Conduct][codeofconduct] and help me keep thi
 
 
 
-[clipreview]: https://github.com/badisi/latest-version/blob/main/cli_preview.png
-[developer]: https://github.com/badisi/latest-version/blob/main/DEVELOPER.md
-[contributing]: https://github.com/badisi/latest-version/blob/main/CONTRIBUTING.md
-[codeofconduct]: https://github.com/badisi/latest-version/blob/main/CODE_OF_CONDUCT.md
+[clipreview]: https://github.com/Badisi/latest-version/blob/main/cli_preview.png
+[developer]: https://github.com/Badisi/latest-version/blob/main/DEVELOPER.md
+[contributing]: https://github.com/Badisi/latest-version/blob/main/CONTRIBUTING.md
+[codeofconduct]: https://github.com/Badisi/latest-version/blob/main/CODE_OF_CONDUCT.md
