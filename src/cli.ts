@@ -1,9 +1,10 @@
-import { blue, bold, cyan, gray, green, italic, magenta, red, reset, strip, underline, yellow } from '@colors/colors/safe';
-import { existsSync, readFileSync } from 'fs';
-import { dirname } from 'path';
-import latestVersion, { type Package, type PackageJson, type LatestVersionPackage, LatestVersionOptions } from './index';
+import { InspectColor, styleText, stripVTControlCharacters as strip } from 'node:util';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 import semverMajor from 'semver/functions/major';
 import semverDiff from 'semver/functions/diff';
+
+import latestVersion, { type Package, type PackageJson, type LatestVersionPackage, LatestVersionOptions } from './index';
 
 interface TableColumn {
     label: string;
@@ -31,13 +32,13 @@ const colorizeDiff = (from: string, to: string): string => {
 
     const diffIndex = from.split('.').findIndex((part, i) => part !== toParts[i]);
     if (diffIndex !== -1) {
-        let color = magenta;
+        let color: InspectColor = 'magenta';
         if (toParts[0] !== '0') {
-            color = (diffIndex === 0) ? red : ((diffIndex === 1) ? cyan : green);
+            color = (diffIndex === 0) ? 'red' : ((diffIndex === 1) ? 'cyan' : 'green');
         }
         const start = toParts.slice(0, diffIndex).join('.');
         const mid = (diffIndex === 0) ? '' : '.';
-        const end = color(toParts.slice(diffIndex).join('.'));
+        const end = styleText(color, toParts.slice(diffIndex).join('.'));
         return `${start}${mid}${end}`;
     }
     return to;
@@ -48,9 +49,9 @@ const columnCellRenderer = (column: TableColumn, row: TableRow): string => {
     const gap = (text.length < column.maxLength) ? ' '.repeat(column.maxLength - text.length) : '';
 
     switch (column.attrName) {
-        case 'name': text = yellow(text); break;
-        case 'installed': case 'separator': text = blue(text); break;
-        case 'location': case 'tagOrRange': text = gray(text); break;
+        case 'name': text = styleText('yellow', text); break;
+        case 'installed': case 'separator': text = styleText('blue', text); break;
+        case 'location': case 'tagOrRange': text = styleText('gray', text); break;
         case 'wanted': text = colorizeDiff(row.installed, text); break;
         case 'latest':
             if (text !== row.wanted) {
@@ -66,19 +67,19 @@ const columnCellRenderer = (column: TableColumn, row: TableRow): string => {
 const columnHeaderRenderer = (column: TableColumn): string => {
     const text = column.label;
     const gap = (text.length < column.maxLength) ? ' '.repeat(column.maxLength - text.length) : '';
-    return (column.align === 'right') ? `${gap}${underline(text)}` : `${underline(text)}${gap}`;
+    return (column.align === 'right') ? `${gap}${styleText('underline', text)}` : `${styleText('underline', text)}${gap}`;
 };
 
-const drawBox = (lines: string[], color = yellow, horizontalPadding = 3): void => {
+const drawBox = (lines: string[], color: InspectColor = 'yellow', horizontalPadding = 3): void => {
     const maxLineWidth = lines.reduce((max, row) => Math.max(max, strip(row).length), 0);
 
-    console.log(color(`┌${'─'.repeat(maxLineWidth + (horizontalPadding * 2))}┐`));
+    console.log(styleText(color, `┌${'─'.repeat(maxLineWidth + (horizontalPadding * 2))}┐`));
     lines.forEach(row => {
         const padding = ' '.repeat(horizontalPadding);
         const fullRow = `${row}${' '.repeat(maxLineWidth - strip(row).length)}`;
-        console.log(`${color('│')}${padding}${reset(fullRow)}${padding}${color('│')}`);
+        console.log(`${styleText(color, '│')}${padding}${fullRow}${padding}${styleText(color, '│')}`);
     });
-    console.log(color(`└${'─'.repeat(maxLineWidth + (horizontalPadding * 2))}┘`));
+    console.log(styleText(color, `└${'─'.repeat(maxLineWidth + (horizontalPadding * 2))}┘`));
 };
 
 const getTableColumns = (rows: TableRow[]): TableColumn[] => {
@@ -166,12 +167,12 @@ const displayTable = (latestVersionPackages: LatestVersionPackage[]): void => {
         const columnGap = 2;
 
         const getGroupLines = (
-            groupType: TableRowGroup, color: (str: string) => string, title: string, description?: string
+            groupType: TableRowGroup, color: InspectColor, title: string, description?: string
         ): string[] => {
             const items = rows.filter(row => row.group === groupType).sort((a, b) => (a.name > b.name) ? 1 : -1);
             return (!items.length) ? [] : [
                 '',
-                color(`${bold(title)} ${italic(`(${description})`)}`),
+                styleText(color, `${styleText('bold', title)} ${styleText('italic', `(${description})`)}`),
                 ...items.map(row => columns.map(column => columnCellRenderer(column, row)).join(' '.repeat(columnGap)))
             ];
         };
@@ -179,18 +180,18 @@ const displayTable = (latestVersionPackages: LatestVersionPackage[]): void => {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         drawBox([
             '',
-            (hasUpdates) ? yellow('Important updates are available.') : undefined,
+            (hasUpdates) ? styleText('yellow', 'Important updates are available.') : undefined,
             (hasUpdates) ? '' : undefined,
             columns.map(columnHeaderRenderer).join(' '.repeat(columnGap)),
-            ...getGroupLines('patch', green, 'Patch', 'backwards-compatible bug fixes'),
-            ...getGroupLines('minor', cyan, 'Minor', 'backwards-compatible features'),
-            ...getGroupLines('major', red, 'Major', 'potentially breaking API changes'),
-            ...getGroupLines('majorVersionZero', magenta, 'Major version zero', 'not stable, anything may change'),
-            ...getGroupLines('unknown', blue, 'Missing', 'not installed'),
+            ...getGroupLines('patch', 'green', 'Patch', 'backwards-compatible bug fixes'),
+            ...getGroupLines('minor', 'cyan', 'Minor', 'backwards-compatible features'),
+            ...getGroupLines('major', 'red', 'Major', 'potentially breaking API changes'),
+            ...getGroupLines('majorVersionZero', 'magenta', 'Major version zero', 'not stable, anything may change'),
+            ...getGroupLines('unknown', 'blue', 'Missing', 'not installed'),
             ''
         ].filter(line => line !== undefined) as string[]);
     } else {
-        console.log(green('🎉 Packages are up-to-date'));
+        console.log(styleText('green', '🎉 Packages are up-to-date'));
     }
 };
 
@@ -200,7 +201,7 @@ const checkVersions = async (
     options: LatestVersionOptions = { useCache: true }
 ): Promise<void> => {
     const ora = (await import('ora')).default;
-    const spinner = ora({ text: cyan('Checking versions...') });
+    const spinner = ora({ text: styleText('cyan', 'Checking versions...') });
     spinner.start();
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -226,7 +227,7 @@ void (async () => {
             process.chdir(dirname(args[0]));
             await checkVersions(JSON.parse(readFileSync(args[0]).toString()) as PackageJson, skipMissing);
         } else {
-            console.log(cyan('No package.json file were found'));
+            console.log(styleText('cyan', 'No package.json file were found'));
         }
     }
     // else..
@@ -258,7 +259,7 @@ void (async () => {
         }
         // ...else do nothing
         else {
-            console.log(cyan('No packages were found'));
+            console.log(styleText('cyan', 'No packages were found'));
         }
     }
 })();

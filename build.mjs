@@ -1,14 +1,12 @@
 /* eslint-disable @typescript-eslint/naming-convention, @typescript-eslint/no-unsafe-argument, no-underscore-dangle */
 
-import { mkdirSync, readFileSync, writeFileSync } from 'fs';
-import { dirname, resolve as pathResolve } from 'path';
-import { fileURLToPath } from 'url';
-import { exec } from 'child_process';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, resolve as pathResolve } from 'node:path';
+import { exec } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { styleText } from 'node:util';
+import { cp } from 'node:fs/promises';
 import { buildSync } from 'esbuild';
-import cpy from 'cpy';
-
-import colors from '@colors/colors/safe.js';
-const { blue, green } = colors;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkgJson = JSON.parse(readFileSync(pathResolve(__dirname, 'package.json')));
@@ -22,10 +20,10 @@ const CONFIG = {
 };
 
 const copyAssets = async () => {
-    await cpy('bin', pathResolve(CONFIG.distPath, 'bin'), { flat: false });
-    await cpy('package.json', CONFIG.distPath, { flat: true });
-    await cpy('README.md', CONFIG.distPath, { flat: true });
-    await cpy('LICENSE', CONFIG.distPath, { flat: true });
+    await cp('bin', pathResolve(CONFIG.distPath, 'bin'), { recursive: true });
+    await cp('package.json', pathResolve(CONFIG.distPath, 'package.json'));
+    await cp('README.md', pathResolve(CONFIG.distPath, 'README.md'));
+    await cp('LICENSE', pathResolve(CONFIG.distPath, 'LICENSE'));
 };
 
 const execCmd = (cmd, opts) => new Promise((resolve, reject) => {
@@ -60,23 +58,23 @@ const build = (entryPoint, platform, format, bundleExternals = false, minify = f
 
 void (async () => {
     try {
-        console.log(blue('Building Library\n'));
+        console.log(styleText('blue', 'Building Library\n'));
 
         // Build index entry point
         console.log('-'.repeat(78));
         console.log(`Building entry point '${pkgJson.name}/index'`);
         console.log('-'.repeat(78));
-        console.log(`${green('✓')} Bundling to CJS`);
+        console.log(`${styleText('green', '✓')} Bundling to CJS`);
         build(pathResolve(__dirname, 'src', 'index.ts'), 'node', 'cjs');
-        console.log(`${green('✓')} Built ${pkgJson.name}/index`, '\n');
+        console.log(`${styleText('green', '✓')} Built ${pkgJson.name}/index`, '\n');
 
         // Build cli entry point
         console.log('-'.repeat(78));
         console.log(`Building entry point '${pkgJson.name}/cli'`);
         console.log('-'.repeat(78));
-        console.log(`${green('✓')} Bundling to CJS`);
+        console.log(`${styleText('green', '✓')} Bundling to CJS`);
         build(pathResolve(__dirname, 'src', 'cli.ts'), 'node', 'cjs');
-        console.log(`${green('✓')} Built ${pkgJson.name}/cli`, '\n');
+        console.log(`${styleText('green', '✓')} Built ${pkgJson.name}/cli`, '\n');
 
         // Build library
         console.log('-'.repeat(78));
@@ -84,15 +82,15 @@ void (async () => {
         console.log('-'.repeat(78));
 
         //  -- types
-        console.log(`${green('✓')} Generating types`);
+        console.log(`${styleText('green', '✓')} Generating types`);
         await execCmd(`tsc --project ${CONFIG.tsconfigPath}`);
 
         //  -- assets
-        console.log(`${green('✓')} Copying assets`);
+        console.log(`${styleText('green', '✓')} Copying assets`);
         await copyAssets();
 
         //  -- package.json
-        console.log(`${green('✓')} Writing package metadata`);
+        console.log(`${styleText('green', '✓')} Writing package metadata`);
         const distPkgJsonPath = pathResolve(CONFIG.distPath, 'package.json');
         const distPkgJson = JSON.parse(readFileSync(distPkgJsonPath, { encoding: 'utf8' }));
         delete distPkgJson.scripts;
@@ -100,14 +98,14 @@ void (async () => {
         writeFileSync(distPkgJsonPath, JSON.stringify(distPkgJson, null, 4), { encoding: 'utf8' });
 
         //  -- end
-        console.log(`${green('✓')} Built ${pkgJson.name}\n`);
+        console.log(`${styleText('green', '✓')} Built ${pkgJson.name}\n`);
 
         // Success
-        console.log(green('-'.repeat(78)));
-        console.log(green('Built Library'));
-        console.log(green(`- from: ${__dirname}`));
-        console.log(green(`- to:   ${CONFIG.distPath}`));
-        console.log(green('-'.repeat(78)));
+        console.log(styleText('green', '-'.repeat(78)));
+        console.log(styleText('green', 'Built Library'));
+        console.log(styleText('green', `- from: ${__dirname}`));
+        console.log(styleText('green', `- to:   ${CONFIG.distPath}`));
+        console.log(styleText('green', '-'.repeat(78)));
 
     } catch (err) {
         console.error(err);

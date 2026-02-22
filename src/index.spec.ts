@@ -1,6 +1,6 @@
-import { existsSync, readFileSync, removeSync } from 'fs-extra';
+import { existsSync, readFileSync, rmSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { npm, yarn } from 'global-dirs';
-import { join, resolve } from 'path';
 import rewire from 'rewire';
 import 'jasmine';
 
@@ -255,7 +255,7 @@ describe('@badisi/latest-version', () => {
         const cacheDir: string = rewire('./index')['__get__']('getCacheDir')();
         describe('useCache=false', () => {
             beforeAll((done) => {
-                removeSync(cacheDir);
+                rmSync(cacheDir, { recursive: true, force: true });
                 spyOnRequire('npm/package.json').and.returnValue({ version: undefined });
                 void latestVersion(['npm', '@badisi/latest-version'], { useCache: false })
                     .then(() => {
@@ -270,7 +270,7 @@ describe('@badisi/latest-version', () => {
         describe('useCache=true', () => {
             let pkgsCached: LatestVersionPackage[];
             beforeEach((done) => {
-                removeSync(cacheDir);
+                rmSync(cacheDir, { recursive: true, force: true });
                 spyOnRequire('npm/package.json').and.returnValue({ version: undefined });
                 void latestVersion(['npm@^5.0.2', '@badisi/latest-version', '@scope/name'], { useCache: true })
                     .then((value: LatestVersionPackage[]) => {
@@ -332,7 +332,7 @@ describe('@badisi/latest-version', () => {
         });
         describe('cacheMaxAge=0', () => {
             beforeEach((done) => {
-                removeSync(cacheDir);
+                rmSync(cacheDir, { recursive: true, force: true });
                 spyOnRequire('npm/package.json').and.returnValue({ version: undefined });
                 void latestVersion(['npm@^5.0.2', '@badisi/latest-version'], { useCache: true })
                     .then(() => {
