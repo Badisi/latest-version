@@ -1,12 +1,13 @@
 {
     "compilerOptions": {
+        "rootDir": "src",
         "outDir": "dist",
         "target": "es2015",
         "lib": [
             "es2017"
         ],
         "module": "commonjs",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "types": [
             "node",
             "jasmine"
