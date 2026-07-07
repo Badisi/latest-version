@@ -32,7 +32,6 @@
 ✅ Check if any `updates` are available<br/>
 ✅ Cache support to increase data retrieval performance<br/>
 ✅ Support public/private repositories and proxies<br/>
-✅ [Command line tool](#command-line-tool) that helps visualize packages updates<br/>
 
 ## Installation
 
@@ -175,23 +174,6 @@ interface LatestVersionOptions {
     requestOptions?: RequestOptions;
 }
 ```
-
-
-## Command line tool
-
-The CLI utility will help you visualize any available updates for a given *package.json* file, a local *package.json* file or any provided package names.
-
-```sh
-$ latest-version <path>
-
-  Examples:
-    $ lv
-    $ latest-version path/to/folder
-    $ latest-version path/to/package.json
-```
-
-![CLI utility preview][clipreview]
-
 
 
 ## Development

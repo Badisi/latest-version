@@ -393,210 +393,208 @@ const testPkg = (
     testValue(actual.error, expected.error, '(pkg.error)');
 };
 
-describe('@badisi/latest-version', () => {
-    describe('Test cache', () => {
-        const cacheDir = getCacheDir();
-        describe('useCache=false', () => {
-            beforeAll(async () => {
-                rmSync(cacheDir, { recursive: true, force: true });
-                spyOnReadFileSync('npm/package.json', { version: undefined });
-                await latestVersion(['npm', '@badisi/latest-version'], { useCache: false });
+describe('Test cache', () => {
+    const cacheDir = getCacheDir();
+    describe('useCache=false', () => {
+        beforeAll(async () => {
+            rmSync(cacheDir, { recursive: true, force: true });
+            spyOnReadFileSync('npm/package.json', { version: undefined });
+            await latestVersion(['npm', '@badisi/latest-version'], { useCache: false });
+        });
+        it('no cache should be created', () => {
+            expect(existsSync(join(cacheDir, 'npm.json')), 'package').toBe(false);
+            expect(existsSync(join(cacheDir, '@badisi/latest-version.json')), 'scoped package').toBe(false);
+        });
+    });
+    describe('useCache=true', () => {
+        let pkgsCached: LatestVersionPackage[];
+        beforeEach(async () => {
+            rmSync(cacheDir, { recursive: true, force: true });
+            spyOnReadFileSync('npm/package.json', { version: undefined });
+            pkgsCached = await latestVersion(['npm@^5.0.2', '@badisi/latest-version', '@scope/name'], { useCache: true });
+        });
+        it('first call -> data should be defined', () => {
+            testPkg(pkgsCached[0], {
+                name: 'npm',
+                local: undefined,
+                globalNpm: undefined,
+                globalYarn: undefined,
+                latest: TO_BE_DEFINED,
+                next: undefined,
+                wanted: TO_BE_DEFINED,
+                wantedTagOrRange: '^5.0.2',
+                updatesAvailable: false,
+                error: undefined,
             });
-            it('no cache should be created', () => {
-                expect(existsSync(join(cacheDir, 'npm.json')), 'package').toBe(false);
-                expect(existsSync(join(cacheDir, '@badisi/latest-version.json')), 'scoped package').toBe(false);
+            testPkg(pkgsCached[1], {
+                name: '@badisi/latest-version',
+                local: undefined,
+                globalNpm: undefined,
+                globalYarn: undefined,
+                latest: TO_BE_DEFINED,
+                next: undefined,
+                wanted: TO_BE_DEFINED,
+                wantedTagOrRange: 'latest',
+                updatesAvailable: false,
+                error: undefined,
+            });
+            testPkg(pkgsCached[2], {
+                name: '@scope/name',
+                local: undefined,
+                globalNpm: undefined,
+                globalYarn: undefined,
+                latest: undefined,
+                next: undefined,
+                wanted: undefined,
+                wantedTagOrRange: 'latest',
+                updatesAvailable: false,
+                error: TO_BE_DEFINED as unknown as Error,
             });
         });
-        describe('useCache=true', () => {
-            let pkgsCached: LatestVersionPackage[];
-            beforeEach(async () => {
-                rmSync(cacheDir, { recursive: true, force: true });
-                spyOnReadFileSync('npm/package.json', { version: undefined });
-                pkgsCached = await latestVersion(['npm@^5.0.2', '@badisi/latest-version', '@scope/name'], { useCache: true });
-            });
-            it('first call -> data should be defined', () => {
-                testPkg(pkgsCached[0], {
-                    name: 'npm',
-                    local: undefined,
-                    globalNpm: undefined,
-                    globalYarn: undefined,
-                    latest: TO_BE_DEFINED,
-                    next: undefined,
-                    wanted: TO_BE_DEFINED,
-                    wantedTagOrRange: '^5.0.2',
-                    updatesAvailable: false,
-                    error: undefined,
-                });
-                testPkg(pkgsCached[1], {
-                    name: '@badisi/latest-version',
-                    local: undefined,
-                    globalNpm: undefined,
-                    globalYarn: undefined,
-                    latest: TO_BE_DEFINED,
-                    next: undefined,
-                    wanted: TO_BE_DEFINED,
-                    wantedTagOrRange: 'latest',
-                    updatesAvailable: false,
-                    error: undefined,
-                });
-                testPkg(pkgsCached[2], {
-                    name: '@scope/name',
-                    local: undefined,
-                    globalNpm: undefined,
-                    globalYarn: undefined,
-                    latest: undefined,
-                    next: undefined,
-                    wanted: undefined,
-                    wantedTagOrRange: 'latest',
-                    updatesAvailable: false,
-                    error: TO_BE_DEFINED as unknown as Error,
-                });
-            });
-            it('first call -> a cache file should be created', () => {
-                expect(existsSync(join(cacheDir, 'npm.json')), 'package').toBe(true);
-                expect(existsSync(join(cacheDir, '@badisi/latest-version.json')), 'scoped package').toBe(true);
-                expect(existsSync(join(cacheDir, '@scope/name.json')), 'non existing package').toBe(false);
-            });
-            it('second call -> data should be defined and returned immediately', async () => {
-                const value = await latestVersion(['npm@^5.0.2', '@badisi/latest-version', '@scope/name'], { useCache: true });
-                testPkg(value[0], {
-                    name: 'npm',
-                    local: undefined,
-                    globalNpm: undefined,
-                    globalYarn: undefined,
-                    latest: TO_BE_DEFINED,
-                    next: undefined,
-                    wanted: '5.10.0',
-                    wantedTagOrRange: '^5.0.2',
-                    updatesAvailable: false,
-                    error: undefined,
-                });
-                testPkg(value[1], {
-                    name: '@badisi/latest-version',
-                    local: undefined,
-                    globalNpm: undefined,
-                    globalYarn: undefined,
-                    latest: TO_BE_DEFINED,
-                    next: undefined,
-                    wanted: TO_BE_DEFINED,
-                    wantedTagOrRange: 'latest',
-                    updatesAvailable: false,
-                    error: undefined,
-                });
-                testPkg(value[2], {
-                    name: '@scope/name',
-                    local: undefined,
-                    globalNpm: undefined,
-                    globalYarn: undefined,
-                    latest: undefined,
-                    next: undefined,
-                    wanted: undefined,
-                    wantedTagOrRange: 'latest',
-                    updatesAvailable: false,
-                    error: TO_BE_DEFINED as unknown as Error,
-                });
-            });
+        it('first call -> a cache file should be created', () => {
+            expect(existsSync(join(cacheDir, 'npm.json')), 'package').toBe(true);
+            expect(existsSync(join(cacheDir, '@badisi/latest-version.json')), 'scoped package').toBe(true);
+            expect(existsSync(join(cacheDir, '@scope/name.json')), 'non existing package').toBe(false);
         });
-        describe('cacheMaxAge=0', () => {
-            beforeEach(async () => {
-                rmSync(cacheDir, { recursive: true, force: true });
-                spyOnReadFileSync('npm/package.json', { version: undefined });
-                await latestVersion(['npm@^5.0.2', '@badisi/latest-version'], { useCache: true });
+        it('second call -> data should be defined and returned immediately', async () => {
+            const value = await latestVersion(['npm@^5.0.2', '@badisi/latest-version', '@scope/name'], { useCache: true });
+            testPkg(value[0], {
+                name: 'npm',
+                local: undefined,
+                globalNpm: undefined,
+                globalYarn: undefined,
+                latest: TO_BE_DEFINED,
+                next: undefined,
+                wanted: '5.10.0',
+                wantedTagOrRange: '^5.0.2',
+                updatesAvailable: false,
+                error: undefined,
             });
-            it('second call with cacheMaxAge=0 -> data should be defined', async () => {
-                const value = await latestVersion(['npm@^5.0.2', '@badisi/latest-version'], { useCache: true, cacheMaxAge: 0 });
-                testPkg(value[0], {
-                    name: 'npm',
-                    local: undefined,
-                    globalNpm: undefined,
-                    globalYarn: undefined,
-                    latest: TO_BE_DEFINED,
-                    next: undefined,
-                    wanted: TO_BE_DEFINED,
-                    wantedTagOrRange: '^5.0.2',
-                    updatesAvailable: false,
-                    error: undefined,
-                });
-                testPkg(value[1], {
-                    name: '@badisi/latest-version',
-                    local: undefined,
-                    globalNpm: undefined,
-                    globalYarn: undefined,
-                    latest: TO_BE_DEFINED,
-                    next: undefined,
-                    wanted: TO_BE_DEFINED,
-                    wantedTagOrRange: 'latest',
-                    updatesAvailable: false,
-                    error: undefined,
-                });
+            testPkg(value[1], {
+                name: '@badisi/latest-version',
+                local: undefined,
+                globalNpm: undefined,
+                globalYarn: undefined,
+                latest: TO_BE_DEFINED,
+                next: undefined,
+                wanted: TO_BE_DEFINED,
+                wantedTagOrRange: 'latest',
+                updatesAvailable: false,
+                error: undefined,
             });
-            it('second call with cacheMaxAge=0 -> lastUpdateDate should be updated', async () => {
-                const { lastUpdateDate: before } = JSON.parse(readFileSync(join(cacheDir, '@badisi/latest-version.json')).toString()) as Record<string, unknown>;
-                await latestVersion('@badisi/latest-version', { useCache: true, cacheMaxAge: 0 });
-                const { lastUpdateDate: after } = JSON.parse(readFileSync(join(cacheDir, '@badisi/latest-version.json')).toString()) as Record<string, unknown>;
-                expect(before as number).toBeLessThan(after as number);
+            testPkg(value[2], {
+                name: '@scope/name',
+                local: undefined,
+                globalNpm: undefined,
+                globalYarn: undefined,
+                latest: undefined,
+                next: undefined,
+                wanted: undefined,
+                wantedTagOrRange: 'latest',
+                updatesAvailable: false,
+                error: TO_BE_DEFINED as unknown as Error,
             });
         });
     });
-
-    TESTS.forEach((test: TestCase) => {
-        describe(test.name, () => {
-            let result: LatestVersionPackage | LatestVersionPackage[];
-
-            beforeAll(async () => {
-                spyOnReadFileSync(resolve(specDirname, '../node_modules/typescript/package.json'), { version: test.fakeLocal });
-                spyOnReadFileSync(resolve(npm.packages, 'typescript/package.json'), { version: test.fakeGlobalNpm });
-                spyOnReadFileSync(resolve(yarn.packages, '../package.json'), { dependencies: { typescript: 'x.x.x' } });
-                spyOnReadFileSync(resolve(yarn.packages, 'typescript/package.json'), { version: test.fakeGlobalYarn });
-
-                if (typeof test.data === 'string') {
-                    result = await latestVersion(test.data);
-                } else if (Array.isArray(test.data)) {
-                    const pkgs = test.data;
-                    result = await latestVersion(pkgs);
-                } else if (isPackageJson(test.data)) {
-                    const pkgs = test.data;
-                    result = await latestVersion(pkgs);
-                }
+    describe('cacheMaxAge=0', () => {
+        beforeEach(async () => {
+            rmSync(cacheDir, { recursive: true, force: true });
+            spyOnReadFileSync('npm/package.json', { version: undefined });
+            await latestVersion(['npm@^5.0.2', '@badisi/latest-version'], { useCache: true });
+        });
+        it('second call with cacheMaxAge=0 -> data should be defined', async () => {
+            const value = await latestVersion(['npm@^5.0.2', '@badisi/latest-version'], { useCache: true, cacheMaxAge: 0 });
+            testPkg(value[0], {
+                name: 'npm',
+                local: undefined,
+                globalNpm: undefined,
+                globalYarn: undefined,
+                latest: TO_BE_DEFINED,
+                next: undefined,
+                wanted: TO_BE_DEFINED,
+                wantedTagOrRange: '^5.0.2',
+                updatesAvailable: false,
+                error: undefined,
             });
+            testPkg(value[1], {
+                name: '@badisi/latest-version',
+                local: undefined,
+                globalNpm: undefined,
+                globalYarn: undefined,
+                latest: TO_BE_DEFINED,
+                next: undefined,
+                wanted: TO_BE_DEFINED,
+                wantedTagOrRange: 'latest',
+                updatesAvailable: false,
+                error: undefined,
+            });
+        });
+        it('second call with cacheMaxAge=0 -> lastUpdateDate should be updated', async () => {
+            const { lastUpdateDate: before } = JSON.parse(readFileSync(join(cacheDir, '@badisi/latest-version.json')).toString()) as Record<string, unknown>;
+            await latestVersion('@badisi/latest-version', { useCache: true, cacheMaxAge: 0 });
+            const { lastUpdateDate: after } = JSON.parse(readFileSync(join(cacheDir, '@badisi/latest-version.json')).toString()) as Record<string, unknown>;
+            expect(before as number).toBeLessThan(after as number);
+        });
+    });
+});
+
+TESTS.forEach((test: TestCase) => {
+    describe(test.name, () => {
+        let result: LatestVersionPackage | LatestVersionPackage[];
+
+        beforeAll(async () => {
+            spyOnReadFileSync(resolve(specDirname, '../node_modules/typescript/package.json'), { version: test.fakeLocal });
+            spyOnReadFileSync(resolve(npm.packages, 'typescript/package.json'), { version: test.fakeGlobalNpm });
+            spyOnReadFileSync(resolve(yarn.packages, '../package.json'), { dependencies: { typescript: 'x.x.x' } });
+            spyOnReadFileSync(resolve(yarn.packages, 'typescript/package.json'), { version: test.fakeGlobalYarn });
 
             if (typeof test.data === 'string') {
-                it('returned type', () => {
-                    expect(Array.isArray(result)).toBe(false);
-                });
-                it(`'${test.data}'`, () => {
-                    testPkg(result as LatestVersionPackage, test.expect as LatestVersionPackage, !!test.fakeLocal, !!test.fakeGlobalNpm, !!test.fakeGlobalYarn);
-                });
+                result = await latestVersion(test.data);
             } else if (Array.isArray(test.data)) {
-                it('returned type', () => {
-                    expect(Array.isArray(result)).toBe(true);
-                });
-                it('returned length', () => {
-                    expect((result as LatestVersionPackage[]).length).toBe((test.expect as LatestVersionPackage[]).length);
-                });
-                for (let i = 0; i < test.data.length; i++) {
-                    it(`'${test.data[i]}'`, () => {
-                        testPkg((result as LatestVersionPackage[])[i], (test.expect as LatestVersionPackage[])[i], !!test.fakeLocal, !!test.fakeGlobalNpm, !!test.fakeGlobalYarn);
-                    });
-                }
+                const pkgs = test.data;
+                result = await latestVersion(pkgs);
             } else if (isPackageJson(test.data)) {
-                const testData: Package[] = [];
-                const allDeps = [test.data.dependencies, test.data.devDependencies, test.data.peerDependencies] as Record<string, string>[];
-                allDeps.forEach(deps => {
-                    testData.push(...Object.keys(deps).map((key: string) => `${key}@${deps[key]}`));
-                });
-                it('returned type', () => {
-                    expect(Array.isArray(result)).toBe(true);
-                });
-                it('returned length', () => {
-                    expect((result as LatestVersionPackage[]).length).toBe(testData.length);
-                });
-                for (let i = 0; i < testData.length; i++) {
-                    it(`'${testData[i]}'`, () => {
-                        testPkg((result as LatestVersionPackage[])[i], (test.expect as LatestVersionPackage[])[i], !!test.fakeLocal, !!test.fakeGlobalNpm, !!test.fakeGlobalYarn);
-                    });
-                }
+                const pkgs = test.data;
+                result = await latestVersion(pkgs);
             }
         });
+
+        if (typeof test.data === 'string') {
+            it('returned type', () => {
+                expect(Array.isArray(result)).toBe(false);
+            });
+            it(`'${test.data}'`, () => {
+                testPkg(result as LatestVersionPackage, test.expect as LatestVersionPackage, !!test.fakeLocal, !!test.fakeGlobalNpm, !!test.fakeGlobalYarn);
+            });
+        } else if (Array.isArray(test.data)) {
+            it('returned type', () => {
+                expect(Array.isArray(result)).toBe(true);
+            });
+            it('returned length', () => {
+                expect((result as LatestVersionPackage[]).length).toBe((test.expect as LatestVersionPackage[]).length);
+            });
+            for (let i = 0; i < test.data.length; i++) {
+                it(`'${test.data[i]}'`, () => {
+                    testPkg((result as LatestVersionPackage[])[i], (test.expect as LatestVersionPackage[])[i], !!test.fakeLocal, !!test.fakeGlobalNpm, !!test.fakeGlobalYarn);
+                });
+            }
+        } else if (isPackageJson(test.data)) {
+            const testData: Package[] = [];
+            const allDeps = [test.data.dependencies, test.data.devDependencies, test.data.peerDependencies] as Record<string, string>[];
+            allDeps.forEach(deps => {
+                testData.push(...Object.keys(deps).map((key: string) => `${key}@${deps[key]}`));
+            });
+            it('returned type', () => {
+                expect(Array.isArray(result)).toBe(true);
+            });
+            it('returned length', () => {
+                expect((result as LatestVersionPackage[]).length).toBe(testData.length);
+            });
+            for (let i = 0; i < testData.length; i++) {
+                it(`'${testData[i]}'`, () => {
+                    testPkg((result as LatestVersionPackage[])[i], (test.expect as LatestVersionPackage[])[i], !!test.fakeLocal, !!test.fakeGlobalNpm, !!test.fakeGlobalYarn);
+                });
+            }
+        }
     });
 });
