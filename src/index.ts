@@ -1,15 +1,12 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
-import type { RequestOptions as HttpRequestOptions, Agent, IncomingMessage, OutgoingHttpHeaders } from 'http';
-import type { RequestOptions as HttpsRequestOptions } from 'https';
-import { join, dirname, resolve as pathResolve, parse } from 'path';
 import { npm, yarn } from 'global-dirs';
-import { homedir } from 'os';
-import { URL } from 'url';
-
-import getRegistryUrl from 'registry-auth-token/registry-url';
-import registryAuthToken from 'registry-auth-token';
-import maxSatisfying from 'semver/ranges/max-satisfying';
+import { existsSync, readFileSync } from 'node:fs';
+import type { Agent } from 'node:http';
+import { dirname, join, parse, resolve as pathResolve } from 'node:path';
 import gt from 'semver/functions/gt';
+import maxSatisfying from 'semver/ranges/max-satisfying';
+
+import { getMetadataFromCache, ONE_DAY, saveMetadataToCache } from './cache';
+import { downloadMetadata, type PackageMetadata } from './metadata';
 
 interface RegistryVersions {
     /**
@@ -66,7 +63,7 @@ interface LatestVersionPackage extends InstalledVersions, RegistryVersions {
 }
 
 interface RequestOptions {
-    readonly ca?: string | Buffer | Array<string | Buffer>;
+    readonly ca?: string | Buffer | (string | Buffer)[];
     readonly rejectUnauthorized?: boolean;
     readonly agent?: Agent | boolean;
     readonly timeout?: number;
@@ -101,7 +98,7 @@ interface LatestVersionOptions {
      * @default "Looks at any registry urls in the .npmrc file or fallback to the default npm registry instead"
      * @example <caption>.npmrc</caption>
      * registry = 'https://custom-registry.com/'
-     * @pkgscope:registry = 'https://custom-registry.com/'
+     * \@pkgscope:registry = 'https://custom-registry.com/'
      */
     readonly registryUrl?: string;
 
@@ -151,11 +148,13 @@ interface LatestVersion {
      * @returns {Promise<LatestVersionPackage[]>}
      */
     (items: Package[], options?: LatestVersionOptions): Promise<LatestVersionPackage[]>; // eslint-disable-line @typescript-eslint/unified-signatures
+
+    (item: Package[] | PackageJson, options?: LatestVersionOptions): Promise<LatestVersionPackage[]>; // eslint-disable-line @typescript-eslint/unified-signatures
 }
 type PackageRange = `${'@' | ''}${string}@${string}`;
 type Package = PackageRange | string; // eslint-disable-line @typescript-eslint/no-redundant-type-constituents
 type PackageJsonDependencies = Record<string, string>;
-type PackageJson = Record<string, any> & ({
+type PackageJson = Record<string, unknown> & { version?: string } & ({
     dependencies: PackageJsonDependencies;
 } | {
     devDependencies: PackageJsonDependencies;
@@ -163,113 +162,9 @@ type PackageJson = Record<string, any> & ({
     peerDependencies: PackageJsonDependencies;
 });
 
-/**
- * @internal
- */
-interface PackageMetadata {
-    name: string;
-    lastUpdateDate: number;
-    versions: string[];
-    distTags: Record<string, string>;
-}
-
-export const ONE_DAY = 1000 * 60 * 60 * 24; // eslint-disable-line @typescript-eslint/naming-convention
-
-const isPackageJson = (obj: any): obj is PackageJson => {
-    return ((obj as PackageJson).dependencies !== undefined) ||
-        ((obj as PackageJson).devDependencies !== undefined) ||
-        ((obj as PackageJson).peerDependencies !== undefined);
-};
-
-const downloadMetadata = (pkgName: string, options?: LatestVersionOptions): Promise<PackageMetadata> => {
-    return new Promise((resolve, reject) => {
-        const i = pkgName.indexOf('/');
-        const pkgScope = (i !== -1) ? pkgName.slice(0, i) : '';
-        const registryUrl = options?.registryUrl ?? getRegistryUrl(pkgScope);
-        const pkgUrl = new URL(encodeURIComponent(pkgName).replace(/^%40/, '@'), registryUrl);
-
-        let requestOptions: HttpRequestOptions | HttpsRequestOptions = {
-            headers: { accept: 'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*' },
-            host: pkgUrl.hostname,
-            path: pkgUrl.pathname,
-            port: pkgUrl.port
-        };
-        const authInfo = registryAuthToken(pkgUrl.toString(), { recursive: true });
-        if (authInfo && requestOptions.headers) {
-            (requestOptions.headers as OutgoingHttpHeaders).authorization = `${authInfo.type} ${authInfo.token}`;
-        }
-        if (options?.requestOptions) {
-            requestOptions = { ...requestOptions, ...options.requestOptions };
-        }
-
-        const { get } = require((pkgUrl.protocol === 'https:') ? 'https' : 'http');
-        const request = get(requestOptions, (res: IncomingMessage) => {
-            if (res.statusCode === 200) {
-                let rawData = '';
-                res.setEncoding('utf8');
-                res.on('data', (chunk: string) => rawData += chunk);
-                res.once('error', (err) => {
-                    res.removeAllListeners();
-                    reject(`Request error (${err.message}): ${pkgUrl}`);
-                });
-                res.once('end', () => {
-                    res.removeAllListeners();
-                    try {
-                        const pkgMetadata = JSON.parse(rawData);
-                        resolve({
-                            name: pkgName,
-                            lastUpdateDate: Date.now(),
-                            versions: Object.keys(pkgMetadata.versions as string[]),
-                            distTags: pkgMetadata['dist-tags']
-                        }); return;
-                    } catch (err) {
-                        reject(err); return;
-                    }
-                });
-            } else {
-                res.removeAllListeners();
-                res.resume(); // consume response data to free up memory
-                reject(`Request error (${res.statusCode}): ${pkgUrl}`); return;
-            }
-        });
-        const abort = (error: Error | string): void => {
-            request.destroy();
-            reject(error);
-        };
-        request.once('timeout', () => { abort(`Request timed out: ${pkgUrl}`); });
-        request.once('error', (err: Error) => { abort(err); });
-        request.once('close', () => { request.removeAllListeners(); });
-    });
-};
-
-const getCacheDir = (name = '@badisi/latest-version'): string => {
-    const homeDir = homedir();
-    switch (process.platform) {
-        case 'darwin': return join(homeDir, 'Library', 'Caches', name);
-        case 'win32': return join(process.env.LOCALAPPDATA ?? join(homeDir, 'AppData', 'Local'), name, 'Cache');
-        default: return join(process.env.XDG_CACHE_HOME ?? join(homeDir, '.cache'), name);
-    }
-};
-
-const saveMetadataToCache = (pkg: PackageMetadata): void => {
-    const filePath = join(getCacheDir(), `${pkg.name}.json`);
-    if (!existsSync(dirname(filePath))) { mkdirSync(dirname(filePath), { recursive: true }); }
-    writeFileSync(filePath, JSON.stringify(pkg));
-};
-
-const getMetadataFromCache = (pkgName: string, options?: LatestVersionOptions): PackageMetadata | undefined => {
-    const maxAge = options?.cacheMaxAge ?? ONE_DAY;
-    if (maxAge !== 0) {
-        const pkgCacheFilePath = join(getCacheDir(), `${pkgName}.json`);
-        if (existsSync(pkgCacheFilePath)) {
-            const pkg = JSON.parse(readFileSync(pkgCacheFilePath).toString()) as PackageMetadata;
-            if ((Date.now() - pkg.lastUpdateDate) < maxAge) {
-                return pkg;
-            }
-        }
-    }
-    return undefined; // invalidates cache
-};
+const isPackageJson = (obj: unknown): obj is PackageJson => ((obj as PackageJson).dependencies !== undefined)
+  || ((obj as PackageJson).devDependencies !== undefined)
+  || ((obj as PackageJson).peerDependencies !== undefined);
 
 const getRegistryVersions = async (pkgName: string, tagOrRange?: string, options?: LatestVersionOptions): Promise<RegistryVersions> => {
     let pkgMetadata: PackageMetadata | undefined;
@@ -284,8 +179,8 @@ const getRegistryVersions = async (pkgName: string, tagOrRange?: string, options
     }
 
     const versions: RegistryVersions = {
-        latest: pkgMetadata?.distTags.latest,
-        next: pkgMetadata?.distTags.next
+        latest: pkgMetadata?.distTags['latest'],
+        next: pkgMetadata?.distTags['next'],
     };
     if (tagOrRange && pkgMetadata?.distTags[tagOrRange]) {
         versions.wanted = pkgMetadata.distTags[tagOrRange];
@@ -297,15 +192,16 @@ const getRegistryVersions = async (pkgName: string, tagOrRange?: string, options
 
 const getInstalledVersion = (pkgName: string, location: keyof InstalledVersions = 'local'): string | undefined => {
     try {
+        const readPackageJson = (path: string): PackageJson => JSON.parse(readFileSync(path, 'utf8')) as PackageJson;
         if (location === 'globalNpm') {
-            return require(join(npm.packages, pkgName, 'package.json'))?.version as string;
+            return readPackageJson(join(npm.packages, pkgName, 'package.json')).version;
         } else if (location === 'globalYarn') {
-            // Make sure package is globally installed by Yarn
-            const yarnGlobalPkg = require(pathResolve(yarn.packages, '..', 'package.json'));
-            if (!yarnGlobalPkg?.dependencies?.[pkgName]) {
+            // Make sure package is trully a global package installed by Yarn
+            const deps = readPackageJson(pathResolve(yarn.packages, '..', 'package.json')).dependencies as PackageJsonDependencies;
+            if (!(pkgName in deps)) {
                 return undefined;
             }
-            return require(join(yarn.packages, pkgName, 'package.json'))?.version as string;
+            return readPackageJson(join(yarn.packages, pkgName, 'package.json')).version;
         } else {
             /**
              * Compute the local paths manually as require.resolve() and require.resolve.paths()
@@ -313,19 +209,19 @@ const getInstalledVersion = (pkgName: string, location: keyof InstalledVersions 
              * @see https://github.com/nodejs/node/issues/33460
              * @see https://github.com/nodejs/loaders/issues/26
              */
-            const { root } = parse(process.cwd());
-            let path = process.cwd();
-            const localPaths = [join(path, 'node_modules')];
-            while (path !== root) {
-                path = dirname(path);
-                localPaths.push(join(path, 'node_modules'));
-            }
-            for (const localPath of localPaths) {
-                const pkgPath = join(localPath, pkgName, 'package.json');
+            const startPath = process.cwd();
+            const { root } = parse(startPath);
+            const findPackageVersion = (path: string, rootPath: string, name: string): string | undefined => {
+                const pkgPath = join(path, 'node_modules', name, 'package.json');
                 if (existsSync(pkgPath)) {
-                    return require(pkgPath)?.version as string;
+                    return readPackageJson(pkgPath).version;
                 }
-            }
+                if (path === rootPath) {
+                    return undefined;
+                }
+                return findPackageVersion(dirname(path), rootPath, name);
+            };
+            return findPackageVersion(startPath, root, pkgName);
         }
         return undefined;
     } catch {
@@ -338,7 +234,7 @@ const getInfo = async (pkg: Package, options?: LatestVersionOptions): Promise<La
     let pkgInfo: LatestVersionPackage = {
         name: (i > 1) ? pkg.slice(0, i) : pkg,
         wantedTagOrRange: (i > 1) ? pkg.slice(i + 1) : 'latest',
-        updatesAvailable: false
+        updatesAvailable: false,
     };
 
     try {
@@ -347,19 +243,28 @@ const getInfo = async (pkg: Package, options?: LatestVersionOptions): Promise<La
             local: getInstalledVersion(pkgInfo.name, 'local'),
             globalNpm: getInstalledVersion(pkgInfo.name, 'globalNpm'),
             globalYarn: getInstalledVersion(pkgInfo.name, 'globalYarn'),
-            ...(await getRegistryVersions(pkgInfo.name, pkgInfo.wantedTagOrRange, options))
+            ...(await getRegistryVersions(pkgInfo.name, pkgInfo.wantedTagOrRange, options)),
         };
+        /* eslint-disable no-nested-ternary */
         const local = (pkgInfo.local && pkgInfo.wanted) ? (gt(pkgInfo.wanted, pkgInfo.local) ? pkgInfo.wanted : false) : false;
         const globalNpm = (pkgInfo.globalNpm && pkgInfo.wanted) ? (gt(pkgInfo.wanted, pkgInfo.globalNpm) ? pkgInfo.wanted : false) : false;
         const globalYarn = (pkgInfo.globalYarn && pkgInfo.wanted) ? (gt(pkgInfo.wanted, pkgInfo.globalYarn) ? pkgInfo.wanted : false) : false;
+        // eslint-enable no-nested-ternary */
         pkgInfo.updatesAvailable = (local || globalNpm || globalYarn) ? { local, globalNpm, globalYarn } : false;
-    } catch (err: any) {
-        pkgInfo.error = err?.message ?? err;
+    } catch (err) {
+        if (typeof err === 'string') {
+            pkgInfo.error = new Error(err);
+        } else if (err instanceof Error) {
+            pkgInfo.error = err;
+        } else {
+            pkgInfo.error = new Error('Unknown error');
+        }
     }
 
     return pkgInfo;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const latestVersion: LatestVersion = async (arg: Package | Package[] | PackageJson, options?: LatestVersionOptions): Promise<any> => {
     const pkgs: Package[] = [];
     if (typeof arg === 'string') {
@@ -385,13 +290,17 @@ const latestVersion: LatestVersion = async (arg: Package | Package[] | PackageJs
 
 export type {
     LatestVersion,
+    LatestVersionOptions,
+    LatestVersionPackage,
     Package,
-    PackageRange,
     PackageJson,
     PackageJsonDependencies,
+    PackageRange,
     RegistryVersions,
-    LatestVersionPackage,
     RequestOptions,
-    LatestVersionOptions
 };
-export default latestVersion;
+
+export {
+    latestVersion,
+    ONE_DAY,
+};

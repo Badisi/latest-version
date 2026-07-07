@@ -7,14 +7,20 @@
     "author": {
         "name": "Badisi"
     },
-    "type": "commonjs",
-    "main": "index.js",
-    "typings": "index.d.ts",
+    "type": "module",
+    "main": "./index.cjs",
+    "module": "./index.mjs",
+    "types": "./index.d.mts",
     "exports": {
         ".": {
-            "require": "./index.js",
-            "types": "./index.d.ts",
-            "default": "./index.js"
+            "import": {
+                "types": "./index.d.mts",
+                "default": "./index.mjs"
+            },
+            "require": {
+                "types": "./index.d.cts",
+                "default": "./index.cjs"
+            }
         },
         "./package.json": "./package.json"
     },
@@ -42,42 +48,34 @@
     ],
     "scripts": {
         "ncu": "npx npm-check-updates -i --format=group --packageFile '{,projects/**/}package.json' --no-deprecated",
-        "start": "ts-node --project=./tsconfig.json ./src/cli",
+        "start": "tsx src/cli.ts",
         "lint": "eslint .",
-        "test": "ts-node ./node_modules/jasmine/bin/jasmine.js --config=jasmine.json",
-        "test:ci": "npm run test",
-        "build": "node ./build.mjs",
+        "test": "vitest run",
+        "test:ci": "vitest run",
+        "test:watch": "vitest",
+        "typecheck": "tsc",
+        "build": "tsc && tsdown",
         "release": "npm publish ./dist --access public"
     },
     "engines": {
         "node": ">= 20.12.0"
     },
     "dependencies": {
+        "enquirer": "^2.4.1",
         "global-dirs": "3.0.1",
         "ora": "^9.4.0",
+        "package-json": "^10.0.1",
         "registry-auth-token": "^5.1.1",
         "semver": "^7.8.0"
     },
     "devDependencies": {
-        "@eslint/js": "^10.0.1",
-        "@stylistic/eslint-plugin": "^5.10.0",
-        "@types/eslint__js": "^8.42.3",
-        "@types/jasmine": "^6.0.0",
-        "@types/node": "^25.8.0",
+        "@hug/eslint-config": "^25.0.1",
+        "@types/node": "^22.0.0",
         "@types/registry-auth-token": "^4.2.4",
-        "@types/rewire": "^2.5.30",
         "@types/semver": "^7.7.1",
-        "esbuild": "^0.28.0",
-        "eslint": "^10.4.0",
-        "eslint-plugin-jsdoc": "^62.9.0",
-        "eslint-plugin-prefer-arrow": "^1.2.3",
-        "globals": "^17.6.0",
-        "jasmine": "^6.2.0",
-        "jasmine-spec-reporter": "^7.0.0",
-        "rewire": "^9.0.1",
-        "ts-node": "^10.9.2",
-        "tslib": "^2.8.1",
-        "typescript": "^6.0.3",
-        "typescript-eslint": "^8.59.3"
+        "tsdown": "^0.22.2",
+        "tsx": "^4.19.0",
+        "typescript": "^5.5.0",
+        "vitest": "^3.0.0"
     }
 }

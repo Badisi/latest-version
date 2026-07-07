@@ -51,11 +51,11 @@ __Example__
 ```ts
 /** CommonJS */
 // const { readFileSync } = require('fs');
-// const latestVersion = require('@badisi/latest-version');
+// const { latestVersion } = require('@badisi/latest-version');
 
 /** ESM / Typescript */
 import { readFileSync } from 'fs';
-import latestVersion from '@badisi/latest-version';
+import { latestVersion } from '@badisi/latest-version';
 
 (async () => {
     // Single package
@@ -182,12 +182,12 @@ interface LatestVersionOptions {
 The CLI utility will help you visualize any available updates for a given *package.json* file, a local *package.json* file or any provided package names.
 
 ```sh
-$ latest-version <packageJson|packageName...>
+$ latest-version <path>
 
   Examples:
     $ lv
+    $ latest-version path/to/folder
     $ latest-version path/to/package.json
-    $ latest-version package1 package2 package3 --skip-missing
 ```
 
 ![CLI utility preview][clipreview]

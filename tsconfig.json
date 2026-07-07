@@ -1,36 +1,28 @@
 {
+    "extends": "./tsconfig.strict.json",
     "compilerOptions": {
-        "rootDir": "src",
-        "outDir": "dist",
-        "target": "es2015",
+        "target": "ESNext",
         "lib": [
-            "es2017"
+            "ESNext"
         ],
-        "module": "commonjs",
+        "module": "ESNext",
         "moduleResolution": "bundler",
         "types": [
-            "node",
-            "jasmine"
+            "node"
         ],
-        "declaration": true,
-        "declarationMap": false,
-        "sourceMap": false,
-        "emitDeclarationOnly": true,
-        "resolveJsonModule": true,
+        "noEmit": true,
+        "skipLibCheck": true,
         "esModuleInterop": true,
-        "importHelpers": true,
-        "pretty": true,
-        "strict": true,
-        "strictPropertyInitialization": true,
-        "noUnusedLocals": true,
-        "noImplicitReturns": true,
-        "noFallthroughCasesInSwitch": true
+        "resolveJsonModule": true,
+        "declaration": true,
+        "isolatedModules": true,
+        "isolatedDeclarations": true
     },
     "include": [
+        "tsdown.config.ts",
         "src/**/*.ts"
     ],
     "exclude": [
-        "node_modules",
-        "src/**/*.spec.ts"
+        "node_modules"
     ]
 }
