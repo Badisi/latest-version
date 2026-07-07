@@ -32,6 +32,7 @@
 ✅ Check if any `updates` are available<br/>
 ✅ Cache support to increase data retrieval performance<br/>
 ✅ Support public/private repositories and proxies<br/>
+✅ Dual build support (CJS/ESM)<br/>
 
 ## Installation
 
@@ -49,12 +50,12 @@ __Example__
 
 ```ts
 /** CommonJS */
-// const { readFileSync } = require('fs');
 // const { latestVersion } = require('@badisi/latest-version');
+// const { readFileSync } = require('node:fs');
 
 /** ESM / Typescript */
-import { readFileSync } from 'fs';
 import { latestVersion } from '@badisi/latest-version';
+import { readFileSync } from 'node:fs';
 
 (async () => {
     // Single package
