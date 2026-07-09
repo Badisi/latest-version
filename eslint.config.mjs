@@ -9,14 +9,4 @@ export default defineConfig(
             },
         },
     }),
-    hug.configs.stylistic.createRecommended({
-        rules: {
-            // TODO: remove after new upgrade of @hug/eslint-config
-            '@stylistic/max-statements-per-line': [
-                'error', {
-                    max: 2,
-                },
-            ],
-        },
-    }),
 );
