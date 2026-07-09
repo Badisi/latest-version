@@ -34,6 +34,10 @@
 ✅ Support public/private repositories and proxies<br/>
 ✅ Dual build support (CJS/ESM)<br/>
 
+🚀 Check out 👉🏻 [@badisi/check-updates][checkupdates]<br/>
+✅ An interactive CLI to scan global or local dependencies and upgrade to wanted or latest versions !
+
+
 ## Installation
 
 ```sh
@@ -197,7 +201,7 @@ Please read and follow the [Code of Conduct][codeofconduct] and help me keep thi
 
 
 
-[clipreview]: https://github.com/Badisi/latest-version/blob/main/cli_preview.png
+[checkupdates]: https://github.com/Badisi/check-updates
 [developer]: https://github.com/Badisi/latest-version/blob/main/DEVELOPER.md
 [contributing]: https://github.com/Badisi/latest-version/blob/main/CONTRIBUTING.md
 [codeofconduct]: https://github.com/Badisi/latest-version/blob/main/CODE_OF_CONDUCT.md
