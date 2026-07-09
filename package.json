@@ -35,6 +35,7 @@
         "latest",
         "current",
         "next",
+        "outdated",
         "version",
         "pkg",
         "package",
@@ -43,7 +44,7 @@
         "module"
     ],
     "scripts": {
-        "ncu": "npx npm-check-updates -i --format=group --packageFile '{,projects/**/}package.json' --no-deprecated",
+        "check-updates": "npx @badisi/check-updates -i",
         "lint": "eslint .",
         "test": "vitest",
         "test:ci": "vitest run",
