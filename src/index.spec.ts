@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { npm, yarn } from 'global-dirs';
-import type * as fs from 'node:fs';
-import { existsSync, type PathOrFileDescriptor, readFileSync, rmSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync } from 'node:fs';
+import type * as fsPromises from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -12,12 +12,12 @@ import { latestVersion, type LatestVersionPackage, type Package, type PackageJso
 const specDirname = dirname(fileURLToPath(import.meta.url));
 
 const mockedFiles = new Map<string, string>();
-vi.mock('node:fs', async importOriginal => {
-    const actual = await importOriginal<typeof fs>();
+vi.mock('node:fs/promises', async importOriginal => {
+    const actual = await importOriginal<typeof fsPromises>();
     return {
         ...actual,
-        readFileSync: vi.fn().mockImplementation((
-            path: PathOrFileDescriptor,
+        readFile: vi.fn().mockImplementation((
+            path: string | URL,
             options?: { encoding?: BufferEncoding | null; flag?: string } | null,
         ) => {
             for (const [mockedPath, mockContent] of mockedFiles.entries()) {
@@ -25,7 +25,7 @@ vi.mock('node:fs', async importOriginal => {
                     return mockContent;
                 }
             }
-            return actual.readFileSync(path, options);
+            return actual.readFile(path, options);
         }),
     };
 });

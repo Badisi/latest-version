@@ -1,5 +1,5 @@
 import { npm, yarn } from 'global-dirs';
-import { existsSync, readFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import type { Agent } from 'node:http';
 import { dirname, join, parse, resolve as pathResolve } from 'node:path';
 import gt from 'semver/functions/gt';
@@ -190,18 +190,18 @@ const getRegistryVersions = async (pkgName: string, tagOrRange?: string, options
     return versions;
 };
 
-const getInstalledVersion = (pkgName: string, location: keyof InstalledVersions = 'local'): string | undefined => {
+const getInstalledVersion = async (pkgName: string, location: keyof InstalledVersions = 'local'): Promise<string | undefined> => {
     try {
-        const readPackageJson = (path: string): PackageJson => JSON.parse(readFileSync(path, 'utf8')) as PackageJson;
+        const readPackageJson = async (path: string): Promise<PackageJson> => JSON.parse(await readFile(path, 'utf8')) as PackageJson;
         if (location === 'globalNpm') {
-            return readPackageJson(join(npm.packages, pkgName, 'package.json')).version;
+            return (await readPackageJson(join(npm.packages, pkgName, 'package.json'))).version;
         } else if (location === 'globalYarn') {
             // Make sure package is trully a global package installed by Yarn
-            const deps = readPackageJson(pathResolve(yarn.packages, '..', 'package.json')).dependencies as PackageJsonDependencies;
+            const deps = (await readPackageJson(pathResolve(yarn.packages, '..', 'package.json'))).dependencies as PackageJsonDependencies;
             if (!(pkgName in deps)) {
                 return undefined;
             }
-            return readPackageJson(join(yarn.packages, pkgName, 'package.json')).version;
+            return (await readPackageJson(join(yarn.packages, pkgName, 'package.json'))).version;
         } else {
             /**
              * Compute the local paths manually as require.resolve() and require.resolve.paths()
@@ -211,19 +211,18 @@ const getInstalledVersion = (pkgName: string, location: keyof InstalledVersions 
              */
             const startPath = process.cwd();
             const { root } = parse(startPath);
-            const findPackageVersion = (path: string, rootPath: string, name: string): string | undefined => {
+            const findPackageVersion = async (path: string, rootPath: string, name: string): Promise<string | undefined> => {
                 const pkgPath = join(path, 'node_modules', name, 'package.json');
-                if (existsSync(pkgPath)) {
-                    return readPackageJson(pkgPath).version;
-                }
+                try {
+                    return (await readPackageJson(pkgPath)).version;
+                } catch { /**/ }
                 if (path === rootPath) {
                     return undefined;
                 }
-                return findPackageVersion(dirname(path), rootPath, name);
+                return await findPackageVersion(dirname(path), rootPath, name);
             };
-            return findPackageVersion(startPath, root, pkgName);
+            return await findPackageVersion(startPath, root, pkgName);
         }
-        return undefined;
     } catch {
         return undefined;
     }
@@ -240,9 +239,9 @@ const getInfo = async (pkg: Package, options?: LatestVersionOptions): Promise<La
     try {
         pkgInfo = {
             ...pkgInfo,
-            local: getInstalledVersion(pkgInfo.name, 'local'),
-            globalNpm: getInstalledVersion(pkgInfo.name, 'globalNpm'),
-            globalYarn: getInstalledVersion(pkgInfo.name, 'globalYarn'),
+            local: await getInstalledVersion(pkgInfo.name, 'local'),
+            globalNpm: await getInstalledVersion(pkgInfo.name, 'globalNpm'),
+            globalYarn: await getInstalledVersion(pkgInfo.name, 'globalYarn'),
             ...(await getRegistryVersions(pkgInfo.name, pkgInfo.wantedTagOrRange, options)),
         };
         /* eslint-disable no-nested-ternary */
