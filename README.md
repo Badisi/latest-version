@@ -3,7 +3,7 @@
 </h1>
 
 <p align="center">
-    <i>📦 Get latest versions of packages.</i><br/>
+    📦 <i>Get latest versions of packages.</i><br/>
 </p>
 
 <p align="center">
@@ -34,8 +34,8 @@
 ✅ Support public/private repositories and proxies<br/>
 ✅ Dual build support (CJS/ESM)<br/>
 
-🚀 Check out 👉🏻 [@badisi/check-updates][checkupdates]<br/>
-✅ An interactive CLI to scan global or local dependencies and upgrade to wanted or latest versions !
+> 🚀 Check out 👉🏻 [@badisi/check-updates][checkupdates]<br/>
+> An interactive CLI to scan, visualize and upgrade NPM dependencies — locally or globally !
 
 
 ## Installation
