@@ -49,7 +49,7 @@
         "test": "vitest",
         "test:ci": "vitest run",
         "typecheck": "tsc --noEmit",
-        "build": "tsc && tsdown",
+        "build": "tsc --noEmit && tsdown",
         "release": "npm publish ./dist --access public"
     },
     "engines": {
