@@ -7,7 +7,6 @@
     "author": {
         "name": "Badisi"
     },
-    "type": "module",
     "main": "./index.cjs",
     "module": "./index.mjs",
     "types": "./index.d.mts",
@@ -70,7 +69,7 @@
         "vitest": "^4.1.10"
     },
     "allowScripts": {
-        "@hug/eslint-config@26.0.0": true,
-        "fsevents@2.3.3": true
+        "@hug/eslint-config": true,
+        "fsevents": true
     }
 }
