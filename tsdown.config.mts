@@ -8,8 +8,8 @@ const config: UserConfig[] = defineConfig([{
     sourcemap: false,
     dts: {
         compilerOptions: {
-            declarationMap: false
-        }
+            declarationMap: false,
+        },
     },
     onSuccess: (): void => {
         const pkgJson = JSON.parse(readFileSync('package.json', 'utf8')) as Record<string, unknown>;
