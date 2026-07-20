@@ -9,6 +9,15 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getCacheDir } from './cache';
 import { latestVersion, type LatestVersionPackage, type Package, type PackageJson } from './index';
 
+interface TestCase {
+    name: string;
+    fakeLocal?: string;
+    fakeGlobalNpm?: string;
+    fakeGlobalYarn?: string;
+    data: Package | Package[] | PackageJson;
+    expect: LatestVersionPackage | LatestVersionPackage[];
+}
+
 const specDirname = dirname(fileURLToPath(import.meta.url));
 
 const mockedFiles = new Map<string, string>();
@@ -34,18 +43,7 @@ const spyOnReadFileSync = (path: string, mockData: Record<string, unknown>): voi
     mockedFiles.set(path, JSON.stringify(mockData));
 };
 
-interface TestCase {
-    name: string;
-    fakeLocal?: string;
-    fakeGlobalNpm?: string;
-    fakeGlobalYarn?: string;
-    data: Package | Package[] | PackageJson;
-    expect: LatestVersionPackage | LatestVersionPackage[];
-}
-
-
 const TO_BE_DEFINED = 'TO_BE_DEFINED';
-
 
 const TESTS: TestCase[] = [{
     name: 'Empty package',
