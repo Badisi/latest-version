@@ -1,4 +1,4 @@
-import { npm, yarn } from 'global-dirs';
+import globalDirs from 'global-directory';
 import { readFile } from 'node:fs/promises';
 import type { Agent } from 'node:http';
 import { dirname, join, parse, resolve as pathResolve } from 'node:path';
@@ -194,14 +194,14 @@ const getInstalledVersion = async (pkgName: string, location: keyof InstalledVer
     try {
         const readPackageJson = async (path: string): Promise<PackageJson> => JSON.parse(await readFile(path, 'utf8')) as PackageJson;
         if (location === 'globalNpm') {
-            return (await readPackageJson(join(npm.packages, pkgName, 'package.json'))).version;
+            return (await readPackageJson(join(globalDirs.npm.packages, pkgName, 'package.json'))).version;
         } else if (location === 'globalYarn') {
             // Make sure package is trully a global package installed by Yarn
-            const deps = (await readPackageJson(pathResolve(yarn.packages, '..', 'package.json'))).dependencies as PackageJsonDependencies;
+            const deps = (await readPackageJson(pathResolve(globalDirs.yarn.packages, '..', 'package.json'))).dependencies as PackageJsonDependencies;
             if (!(pkgName in deps)) {
                 return undefined;
             }
-            return (await readPackageJson(join(yarn.packages, pkgName, 'package.json'))).version;
+            return (await readPackageJson(join(globalDirs.yarn.packages, pkgName, 'package.json'))).version;
         } else {
             /**
              * Compute the local paths manually as require.resolve() and require.resolve.paths()

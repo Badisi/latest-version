@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { npm, yarn } from 'global-dirs';
+import globalDirs from 'global-directory';
 import { existsSync, readFileSync, rmSync } from 'node:fs';
 import type * as fsPromises from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
@@ -542,9 +542,9 @@ TESTS.forEach((test: TestCase) => {
 
         beforeAll(async () => {
             spyOnReadFileSync(resolve(specDirname, '../node_modules/typescript/package.json'), { version: test.fakeLocal });
-            spyOnReadFileSync(resolve(npm.packages, 'typescript/package.json'), { version: test.fakeGlobalNpm });
-            spyOnReadFileSync(resolve(yarn.packages, '../package.json'), { dependencies: { typescript: 'x.x.x' } });
-            spyOnReadFileSync(resolve(yarn.packages, 'typescript/package.json'), { version: test.fakeGlobalYarn });
+            spyOnReadFileSync(resolve(globalDirs.npm.packages, 'typescript/package.json'), { version: test.fakeGlobalNpm });
+            spyOnReadFileSync(resolve(globalDirs.yarn.packages, '../package.json'), { dependencies: { typescript: 'x.x.x' } });
+            spyOnReadFileSync(resolve(globalDirs.yarn.packages, 'typescript/package.json'), { version: test.fakeGlobalYarn });
 
             if (typeof test.data === 'string') {
                 result = await latestVersion(test.data);
