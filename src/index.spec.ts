@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import globalDirs from 'global-directory';
-import { existsSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, type ReadFileOptionsWithBuffer, readFileSync, rmSync } from 'node:fs';
 import type * as fsPromises from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -27,7 +27,7 @@ vi.mock('node:fs/promises', async importOriginal => {
         ...actual,
         readFile: vi.fn().mockImplementation((
             path: string | URL,
-            options?: { encoding?: BufferEncoding | null; flag?: string } | null,
+            options?: ReadFileOptionsWithBuffer<NodeJS.ArrayBufferView>,
         ) => {
             for (const [mockedPath, mockContent] of mockedFiles.entries()) {
                 if (String(path).includes(join(mockedPath))) {
