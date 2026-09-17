@@ -61,12 +61,12 @@
         "semver": "^7.8.5"
     },
     "devDependencies": {
-        "@hug/eslint-config": "^27.0.2",
-        "@types/node": "^26.1.2",
+        "@hug/eslint-config": "^28.0.0",
+        "@types/node": "^26.6.1",
         "@types/semver": "^7.8.0",
-        "tsdown": "^0.22.14",
+        "tsdown": "^0.23.0",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.10"
+        "vitest": "^5.0.1"
     },
     "overrides": {
         "@hug/eslint-config": {
