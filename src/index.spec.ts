@@ -6,8 +6,8 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { getCacheDir } from './cache';
-import { latestVersion, type LatestVersionPackage, type Package, type PackageJson } from './index';
+import { getCacheDir } from './cache.js';
+import { latestVersion, type LatestVersionPackage, type Package, type PackageJson } from './index.js';
 
 interface TestCase {
     name: string;

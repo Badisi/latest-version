@@ -2,11 +2,11 @@ import globalDirs from 'global-directory';
 import { readFile } from 'node:fs/promises';
 import type { Agent } from 'node:http';
 import { dirname, join, parse, resolve as pathResolve } from 'node:path';
-import gt from 'semver/functions/gt';
-import maxSatisfying from 'semver/ranges/max-satisfying';
+import gt from 'semver/functions/gt.js';
+import maxSatisfying from 'semver/ranges/max-satisfying.js';
 
-import { getMetadataFromCache, ONE_DAY, saveMetadataToCache } from './cache';
-import { downloadMetadata, type PackageMetadata } from './metadata';
+import { getMetadataFromCache, ONE_DAY, saveMetadataToCache } from './cache.js';
+import { downloadMetadata, type PackageMetadata } from './metadata.js';
 
 interface RegistryVersions {
     /**

@@ -2,9 +2,9 @@ import { get as httpGet, type IncomingMessage, type OutgoingHttpHeaders, type Re
 import { get as httpsGet, type RequestOptions as HttpsRequestOptions } from 'node:https';
 import { URL } from 'node:url';
 import registryAuthToken from 'registry-auth-token';
-import getRegistryUrl from 'registry-auth-token/registry-url';
+import getRegistryUrl from 'registry-auth-token/registry-url.js';
 
-import type { LatestVersionOptions } from './index';
+import type { LatestVersionOptions } from './index.js';
 
 export interface PackageMetadata {
     name: string;
